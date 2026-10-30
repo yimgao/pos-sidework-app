@@ -30,29 +30,35 @@ export default function App() {
     )
   }
   const tabs = [
-    ['schedule', '排班 Schedule'],
-    ['today', '今日 Sidework'],
+    ['schedule', '排班'],
+    ['today', '今日'],
     ['score', '分数'],
   ]
-  if (user.is_manager) tabs.push(['review', '经理复核'], ['report', '每日报告'], ['suggest', '下周排班建议'])
+  if (user.is_manager) tabs.push(['review', '复核'], ['report', '报告'], ['suggest', '建议'])
+  const navButtons = (cls) => (
+    <nav className={cls}>
+      {tabs.map(([k, label]) => <button key={k} className={tab === k ? 'active' : ''} onClick={() => setTab(k)}>{label}</button>)}
+    </nav>
+  )
   return (
-    <>
-      <header><h1>排班 + Sidework</h1><p>两个单独模块：排班模块 · Sidework 检查模块 · 交点是表现分 → 排班建议</p></header>
-      <nav>
-        {tabs.map(([k, label]) => <button key={k} className={tab === k ? 'active' : ''} onClick={() => setTab(k)}>{label}</button>)}
-      </nav>
-      <main>
-        <div className="card">
-          <span>当前：{user.name}{user.is_manager ? '（经理）' : '（员工）'}</span>{' '}
-          <button className="btn2" onClick={() => { clearToken(); setUser(null) }}>退出</button>
-        </div>
-        {tab === 'schedule' && <SchedulePage user={user} />}
-        {tab === 'today' && <TodayPage user={user} />}
-        {tab === 'score' && <ScorePage user={user} />}
-        {tab === 'review' && user.is_manager && <ReviewPage />}
-        {tab === 'report' && user.is_manager && <ReportPage />}
-        {tab === 'suggest' && user.is_manager && <SuggestPage />}
-      </main>
-    </>
+    <div className="layout">
+      <aside className="sidebar">
+        <h1>排班 + Sidework</h1>
+        <p className="muted">两个单独模块：排班 · Sidework 检查 · 交点是表现分 → 排班建议</p>
+        {navButtons('side-nav')}
+      </aside>
+      <div className="maincol">
+        <header><h1>排班 + Sidework</h1><p>当前：{user.name}{user.is_manager ? '（经理）' : '（员工）'} <button className="btn2" onClick={() => { clearToken(); setUser(null) }}>退出</button></p></header>
+        <main>
+          {tab === 'schedule' && <SchedulePage user={user} />}
+          {tab === 'today' && <TodayPage user={user} />}
+          {tab === 'score' && <ScorePage user={user} />}
+          {tab === 'review' && user.is_manager && <ReviewPage />}
+          {tab === 'report' && user.is_manager && <ReportPage />}
+          {tab === 'suggest' && user.is_manager && <SuggestPage />}
+        </main>
+        {navButtons('bottom-nav')}
+      </div>
+    </div>
   )
 }

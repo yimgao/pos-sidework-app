@@ -1,8 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 *{box-sizing:border-box} body{font-family:system-ui,-apple-system,Arial,sans-serif;margin:0;background:#f6f6f6;color:#222}
 header{background:#111;color:#fff;padding:14px 16px} header h1{font-size:18px;margin:0} header p{margin:4px 0 0;color:#ccc;font-size:13px}
 nav{display:flex;gap:8px;padding:10px;overflow-x:auto;background:#fff;border-bottom:1px solid #ddd}
 nav button{border:1px solid #ddd;background:#fff;padding:10px 14px;border-radius:20px;white-space:nowrap;font-size:15px}
 nav button.active{background:#111;color:#fff}
+.sidebar{display:none}
+.bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:10;justify-content:space-around;border-top:1px solid #ddd;border-bottom:0;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+.bottom-nav button{border:0;padding:12px 8px;border-radius:8px;font-size:14px}
+@media (min-width:768px){
+  .sidebar{display:block;width:220px;flex-shrink:0;padding:16px;background:#fff;border-right:1px solid #ddd;position:sticky;top:0;height:100vh}
+  .sidebar h1{font-size:18px;margin:0 0 6px}
+  .side-nav{display:block;border-bottom:0;padding:10px 0}
+  .side-nav button{display:block;width:100%;margin-bottom:8px;text-align:left;border-radius:8px}
+  .layout{display:flex;align-items:flex-start}
+  .maincol{flex:1;min-width:0}
+  main{max-width:1100px}
+  .bottom-nav{display:none}
+  header h1{display:none}
+}
+@media (max-width:767px){
+  main{padding-bottom:90px}
+  .sidebar{display:none}
+}
 main{padding:14px;max-width:900px;margin:0 auto}
 .card{background:#fff;border:1px solid #ddd;border-radius:12px;padding:14px;margin-bottom:12px}
 .card h2{font-size:17px;margin:0 0 8px} .muted{color:#666;font-size:13px}

@@ -34,6 +34,8 @@ export const generateReport = () => api('/api/reports/daily/generate', { method:
 export const scheduleSuggestion = (day) => api('/api/schedule/suggestion?day=' + day)
 export const scheduleWeek = (weekStart) => api('/api/schedule?week_start=' + weekStart)
 export const shiftTemplates = () => api('/api/schedule/templates')
+export const createSchedule = (body) => api('/api/schedule', { method: 'POST', body })
+export const publishSchedule = (weekStart) => api('/api/schedule/publish?week_start=' + weekStart, { method: 'POST' })
 
 export function mondayOf(d = new Date()) {
   const x = new Date(d)
