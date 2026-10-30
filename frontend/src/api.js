@@ -1,0 +1,44 @@
+// 所有后端调用集中在这里，前端页面不直接拼 URL。
+export function getToken() { return localStorage.getItem('pos-token') || '' }
+export function setToken(t) { localStorage.setItem('pos-token', t) }
+export function clearToken() { localStorage.removeItem('pos-token') }
+
+export async function api(path, { method = 'GET', body, form } = {}) {
+  const headers = {}
+  if (!form) headers['Content-Type'] = 'application/json'
+  const token = getToken()
+  if (token) headers['Authorization'] = 'Bearer ' + token
+  const res = await fetch(path, {
+    method,
+    headers,
+    body: form ? body : body ? JSON.stringify(body) : undefined,
+  })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(data.detail || '请求失败')
+  return data
+}
+
+export const login = (pin) => api('/api/auth/login', { method: 'POST', body: { pin } })
+export const me = () => api('/api/auth/me')
+export const listEmployees = () => api('/api/employees')
+export const listTemplates = () => api('/api/sidework/templates')
+export const myToday = () => api('/api/sidework/my/today')
+export const completeTask = (form) => api('/api/sidework/complete', { method: 'POST', form })
+export const pendingReview = () => api('/api/review/pending')
+export const reviewRecord = (id, body) => api('/api/review/' + id, { method: 'POST', body })
+export const markLate = (id) => api('/api/review/' + id + '/late', { method: 'POST' })
+export const myScore = () => api('/api/scores/me')
+export const allScores = () => api('/api/scores/all')
+export const dailyReport = () => api('/api/reports/daily')
+export const generateReport = () => api('/api/reports/daily/generate', { method: 'POST' })
+export const scheduleSuggestion = (day) => api('/api/schedule/suggestion?day=' + day)
+export const scheduleWeek = (weekStart) => api('/api/schedule?week_start=' + weekStart)
+export const shiftTemplates = () => api('/api/schedule/templates')
+
+export function mondayOf(d = new Date()) {
+  const x = new Date(d)
+  const day = (x.getDay() + 6) % 7
+  x.setDate(x.getDate() - day)
+  return x.toISOString().slice(0, 10)
+}
+export function todayStr() { return new Date().toISOString().slice(0, 10) }

@@ -1,0 +1,18 @@
+*{box-sizing:border-box} body{font-family:system-ui,-apple-system,Arial,sans-serif;margin:0;background:#f6f6f6;color:#222}
+header{background:#111;color:#fff;padding:14px 16px} header h1{font-size:18px;margin:0} header p{margin:4px 0 0;color:#ccc;font-size:13px}
+nav{display:flex;gap:8px;padding:10px;overflow-x:auto;background:#fff;border-bottom:1px solid #ddd}
+nav button{border:1px solid #ddd;background:#fff;padding:10px 14px;border-radius:20px;white-space:nowrap;font-size:15px}
+nav button.active{background:#111;color:#fff}
+main{padding:14px;max-width:900px;margin:0 auto}
+.card{background:#fff;border:1px solid #ddd;border-radius:12px;padding:14px;margin-bottom:12px}
+.card h2{font-size:17px;margin:0 0 8px} .muted{color:#666;font-size:13px}
+input,select,textarea{width:100%;padding:11px;margin:6px 0;border:1px solid #ccc;border-radius:8px;font-size:15px}
+button.btn{background:#111;color:#fff;border:0;padding:11px 14px;border-radius:8px;font-size:15px;margin:4px 4px 4px 0}
+button.btn2{background:#eee;color:#111;border:0;padding:9px 12px;border-radius:8px;font-size:14px;margin:4px 4px 4px 0}
+button.green{background:#1a7f4b} button.red{background:#b42318}
+.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:12px;background:#eee}
+.tag.ok{background:#d8f3e3} .tag.bad{background:#fde3e0} .tag.warn{background:#fff1c9}
+table{width:100%;border-collapse:collapse;font-size:14px} th,td{border-bottom:1px solid #eee;padding:8px;text-align:left}
+img.thumb{width:100%;max-width:320px;border-radius:8px;margin-top:6px}
+.task{border:1px solid #eee;border-radius:10px;padding:10px;margin:8px 0}
+pre{white-space:pre-wrap;background:#fafafa;border:1px solid #eee;border-radius:8px;padding:12px;font-size:14px}
