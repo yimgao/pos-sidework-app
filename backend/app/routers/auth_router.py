@@ -21,7 +21,7 @@ def login(body: LoginIn, db: Session = Depends(get_db)):
             user = emp
             break
     if not user:
-        raise HTTPException(status_code=401, detail="PIN 不对")
+        raise HTTPException(status_code=401, detail="Wrong PIN PIN 不对")
     return {"token": create_token(user.id),
             "user": {"id": user.id, "name": user.name, "role": user.role, "is_manager": user.is_manager}}
 

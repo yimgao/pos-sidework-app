@@ -33,9 +33,9 @@ def score_for_day(db: Session, employee_id: int, day) -> dict:
 
 def suggestion_for_score(score: float, done: int = 0, reviewed: int = 0) -> dict:
     if done == 0 and reviewed == 0:
-        return {"suggestion": "keep", "label": "暂无记录，正常排班"}
+        return {"suggestion": "keep", "label": "No record yet, keep schedule 暂无记录，正常排班"}
     if score < 70:
-        return {"suggestion": "minus_half_day", "label": "建议减半天（少一个班次），经理终审"}
+        return {"suggestion": "minus_half_day", "label": "Reduce by half day (one fewer shift), manager approval 建议减半天（少一个班次），经理终审"}
     if score < 84:
-        return {"suggestion": "talk", "label": "提醒谈话，本周先不减班"}
-    return {"suggestion": "keep", "label": "正常排班（keep schedule）"}
+        return {"suggestion": "talk", "label": "Talk first, no reduction this week 提醒谈话，本周先不减班"}
+    return {"suggestion": "keep", "label": "Keep schedule 正常排班"}

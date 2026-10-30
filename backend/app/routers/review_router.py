@@ -30,7 +30,7 @@ def pending(db: Session = Depends(get_db), manager: Employee = Depends(require_m
 @router.post("/{record_id}")
 def review(record_id: int, body: ReviewIn, db: Session = Depends(get_db), manager: Employee = Depends(require_manager)):
     if body.result not in ("pass", "fail"):
-        raise HTTPException(status_code=400, detail="result 只能是 pass 或 fail")
+        raise HTTPException(status_code=400, detail="result must be pass or fail result 只能是 pass 或 fail")
     if body.result == "fail" and not body.note.strip():
         raise HTTPException(status_code=400, detail="打回时请写一句话原因")
     rec = db.query(SideworkRecord).filter(SideworkRecord.id == record_id).first()
