@@ -6,7 +6,7 @@ export default function ReviewPage() {
   const [notes, setNotes] = useState({})
   const [msg, setMsg] = useState('')
   const load = () => pendingReview().then(setRows).catch((e) => setMsg(e.message))
-  useEffect(load, [])
+  useEffect(() => { load() }, [])
   if (!rows.length) return <div className="card"><h2>经理复核</h2><p className="muted">暂无待复核记录。{msg}</p></div>
   return (
     <div className="card">

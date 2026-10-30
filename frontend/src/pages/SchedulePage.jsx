@@ -24,7 +24,7 @@ export default function SchedulePage({ user }) {
     }).catch(() => {})
     scheduleWeek(week).then(setRows).catch(() => {})
   }
-  useEffect(load, [week])
+  useEffect(() => { load() }, [week])
 
   return (
     <div className="card">

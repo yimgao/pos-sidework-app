@@ -7,7 +7,7 @@ export default function TodayPage({ user }) {
   const [notes, setNotes] = useState({})
   const [msg, setMsg] = useState('')
   const load = () => myToday().then(setData).catch((e) => setMsg(e.message))
-  useEffect(load, [])
+  useEffect(() => { load() }, [])
   if (user.is_manager) return <div className="card"><h2>今日 Sidework</h2><p className="muted">经理请去“经理复核”页。员工登录后在这里做自己当天的清单。</p></div>
   if (!data) return <div className="card">加载中…</div>
   let cur = ''
