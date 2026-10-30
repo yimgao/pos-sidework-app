@@ -26,18 +26,16 @@ def all_scores(day: datetime.date | None = None, db: Session = Depends(get_db), 
 
 
 @router.get("/reports/daily")
-def get_report(date: datetime.date | None = None, db: Session = Depends(get_db), manager: Employee = Depends(require_manager)):
+def get_report(date: datetime.date | None = None, lang: str = "en", db: Session = Depends(get_db), manager: Employee = Depends(require_manager)):
     day = date or datetime.date.today()
-    saved = db.query(DailyReport).filter(DailyReport.date == day).first()
-    if saved:
-        return {"date": str(day), "summary_text": saved.summary_text}
-    return build_daily_report(db, day)
+    # Language switch must work instantly: always build in the requested language.
+    return build_daily_report(db, day, lang=lang)
 
 
 @router.post("/reports/daily/generate")
-def generate_report(date: datetime.date | None = None, db: Session = Depends(get_db), manager: Employee = Depends(require_manager)):
+def generate_report(date: datetime.date | None = None, lang: str = "en", db: Session = Depends(get_db), manager: Employee = Depends(require_manager)):
     day = date or datetime.date.today()
-    data = build_daily_report(db, day)
+    data = build_daily_report(db, day, lang=lang)
     saved = db.query(DailyReport).filter(DailyReport.date == day).first()
     if saved:
         saved.summary_text = data["summary_text"]

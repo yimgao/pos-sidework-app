@@ -58,9 +58,9 @@ def publish(week_start: datetime.date, db: Session = Depends(get_db), manager: E
 
 
 @router.get("/suggestion")
-def suggestion(day: datetime.date, db: Session = Depends(get_db), manager: Employee = Depends(require_manager)):
+def suggestion(day: datetime.date, lang: str = "en", db: Session = Depends(get_db), manager: Employee = Depends(require_manager)):
     out = []
     for emp in db.query(Employee).filter(Employee.is_manager == False, Employee.is_active == True).all():  # noqa: E712
         s = score_for_day(db, emp.id, day)
-        out.append({"employee_id": emp.id, "name": emp.name, **s, **suggestion_for_score(s["score"], done=s["done"], reviewed=s["reviewed"])})
+        out.append({"employee_id": emp.id, "name": emp.name, **s, **suggestion_for_score(s["score"], done=s["done"], reviewed=s["reviewed"], lang=lang)})
     return out

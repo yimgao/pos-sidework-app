@@ -31,11 +31,19 @@ def score_for_day(db: Session, employee_id: int, day) -> dict:
     }
 
 
-def suggestion_for_score(score: float, done: int = 0, reviewed: int = 0) -> dict:
+def _pick_title(title: str, lang: str) -> str:
+    parts = str(title).split(" || ")
+    if len(parts) == 2:
+        return parts[1] if lang == "zh" else parts[0]
+    return title
+
+
+def suggestion_for_score(score: float, done: int = 0, reviewed: int = 0, lang: str = "en") -> dict:
+    zh = lang == "zh"
     if done == 0 and reviewed == 0:
-        return {"suggestion": "keep", "label": "No record yet, keep schedule 暂无记录，正常排班"}
+        return {"suggestion": "keep", "label": "暂无记录，正常排班" if zh else "No record yet, keep schedule"}
     if score < 70:
-        return {"suggestion": "minus_half_day", "label": "Reduce by half day (one fewer shift), manager approval 建议减半天（少一个班次），经理终审"}
+        return {"suggestion": "minus_half_day", "label": "建议减半天（少一个班次），经理终审" if zh else "Reduce by half day (one fewer shift), manager approval"}
     if score < 84:
-        return {"suggestion": "talk", "label": "Talk first, no reduction this week 提醒谈话，本周先不减班"}
-    return {"suggestion": "keep", "label": "Keep schedule 正常排班"}
+        return {"suggestion": "talk", "label": "提醒谈话，本周先不减班" if zh else "Talk first, no reduction this week"}
+    return {"suggestion": "keep", "label": "正常排班" if zh else "Keep schedule"}
