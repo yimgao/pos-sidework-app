@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { clearToken, login, me, setToken } from './api'
+import { dict, getLang, setLang } from './i18n'
 import SchedulePage from './pages/SchedulePage'
 import TodayPage from './pages/TodayPage'
 import ReviewPage from './pages/ReviewPage'
@@ -20,15 +21,24 @@ function Icon({ name }) {
   return <svg {...p}>{paths[name]}</svg>
 }
 
+function LangSwitch({ lang, onChange, compact }) {
+  return (
+    <div className={compact ? 'lang-switch compact' : 'lang-switch'}>
+      <button className={lang === 'en' ? 'active' : ''} onClick={() => onChange('en')}>EN</button>
+      <button className={lang === 'zh' ? 'active' : ''} onClick={() => onChange('zh')}>中文</button>
+    </div>
+  )
+}
+
 const COMMON = [
-  ['schedule', 'Schedule', '排班', 'schedule'],
-  ['today', 'Today', '今日', 'today'],
-  ['score', 'Score', '分数', 'score'],
+  ['schedule', 'schedule'],
+  ['today', 'today'],
+  ['score', 'score'],
 ]
 const MANAGER = [
-  ['review', 'Review', '复核', 'review'],
-  ['report', 'Report', '报告', 'report'],
-  ['suggest', 'Suggestions', '建议', 'suggest'],
+  ['review', 'review'],
+  ['report', 'report'],
+  ['suggest', 'suggestions'],
 ]
 
 export default function App() {
@@ -36,20 +46,24 @@ export default function App() {
   const [pin, setPin] = useState('')
   const [msg, setMsg] = useState('')
   const [tab, setTab] = useState('schedule')
+  const [lang, setLangState] = useState(getLang())
+  const changeLang = (l) => { setLang(l); setLangState(l) }
+  const L = dict(lang)
   useEffect(() => { if (localStorage.getItem('pos-token')) me().then(setUser).catch(() => clearToken()) }, [])
   if (!user) {
     return (
       <main className="login-wrap">
         <div className="card login-card">
+          <LangSwitch lang={lang} onChange={changeLang} />
           <div className="login-mark"><Icon name="schedule" /></div>
-          <h1>Schedule · Sidework</h1>
-          <p className="muted">Schedule &amp; Sidework, two independent modules 排班 · Sidework，两个独立模块</p>
-          <input inputMode="numeric" placeholder="Enter PIN 输入 PIN" value={pin} onChange={(e) => setPin(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') document.getElementById('login-btn').click() }} />
+          <h1>{L.login.title}</h1>
+          <p className="muted">{L.appSub}</p>
+          <input inputMode="numeric" placeholder={L.login.enterPin} value={pin} onChange={(e) => setPin(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') document.getElementById('login-btn').click() }} />
           <button id="login-btn" className="btn login-btn" onClick={async () => {
             try { const d = await login(pin); setToken(d.token); setUser(d.user); setTab(d.user.is_manager ? 'schedule' : 'today') }
-            catch (e) { setMsg(e.message) }
-          }}>Enter 进入</button>
-          <p className="muted">Demo PINs 演示 PIN：Manager 经理 123456 · Anna 1111 · Ben 2222 · Chris 3333</p>
+            catch (e) { setMsg(lang === 'zh' ? 'PIN 不对' : 'Wrong PIN') }
+          }}>{L.login.enter}</button>
+          <p className="muted">{L.login.demo}</p>
           <p className="muted error">{msg}</p>
         </div>
       </main>
@@ -60,42 +74,43 @@ export default function App() {
   return (
     <div className="layout">
       <aside className="sidebar">
-        <div className="brand"><div className="brand-mark"><Icon name="schedule" /></div><div><b>Schedule · Sidework</b><small>排班 · Sidework</small></div></div>
-        <p className="nav-label">My 我的</p>
+        <div className="brand"><div className="brand-mark"><Icon name="schedule" /></div><div><b>{L.appName}</b><small>{lang === 'en' ? 'Schedule & Sidework' : '排班 · Sidework'}</small></div></div>
+        <p className="nav-label">{L.my}</p>
         <nav className="side-nav">
-          {COMMON.map(([k, label, sub, icon]) => (
+          {COMMON.map(([k, icon]) => (
             <button key={k} className={tab === k ? 'active' : ''} onClick={() => setTab(k)}>
-              <Icon name={icon} /><span><b>{label}</b><small>{sub}</small></span>
+              <Icon name={icon} /><span><b>{L.nav[k]}</b></span>
             </button>
           ))}
         </nav>
-        {user.is_manager && (<><p className="nav-label">Manager 经理</p><nav className="side-nav">
-          {MANAGER.map(([k, label, sub, icon]) => (
+        {user.is_manager && (<><p className="nav-label">{L.manager}</p><nav className="side-nav">
+          {MANAGER.map(([k, icon]) => (
             <button key={k} className={tab === k ? 'active' : ''} onClick={() => setTab(k)}>
-              <Icon name={icon} /><span><b>{label}</b><small>{sub}</small></span>
+              <Icon name={icon} /><span><b>{L.nav[k]}</b></span>
             </button>
           ))}
         </nav></>)}
+        <LangSwitch lang={lang} onChange={changeLang} />
         <div className="user-card">
           <div className="avatar">{user.name.slice(0, 1)}</div>
-          <div className="user-meta"><b>{user.name}</b><small>{user.is_manager ? 'Manager 经理' : 'Staff 员工'}</small></div>
-          <button className="btn2" onClick={logout}>Logout 退出</button>
+          <div className="user-meta"><b>{user.name}</b><small>{user.is_manager ? L.manager : L.staff}</small></div>
+          <button className="btn2" onClick={logout}>{L.logout}</button>
         </div>
       </aside>
       <div className="maincol">
-        <header className="mobile-header"><b>Schedule · Sidework</b><span>{user.name}</span></header>
+        <header className="mobile-header"><b>{L.appName}</b><LangSwitch lang={lang} onChange={changeLang} compact /></header>
         <main>
-          {tab === 'schedule' && <SchedulePage user={user} />}
-          {tab === 'today' && <TodayPage user={user} />}
-          {tab === 'score' && <ScorePage user={user} />}
-          {tab === 'review' && user.is_manager && <ReviewPage />}
-          {tab === 'report' && user.is_manager && <ReportPage />}
-          {tab === 'suggest' && user.is_manager && <SuggestPage />}
+          {tab === 'schedule' && <SchedulePage user={user} lang={lang} />}
+          {tab === 'today' && <TodayPage user={user} lang={lang} />}
+          {tab === 'score' && <ScorePage user={user} lang={lang} />}
+          {tab === 'review' && user.is_manager && <ReviewPage lang={lang} />}
+          {tab === 'report' && user.is_manager && <ReportPage lang={lang} />}
+          {tab === 'suggest' && user.is_manager && <SuggestPage lang={lang} />}
         </main>
         <nav className="bottom-nav">
-          {tabs.map(([k, label, sub, icon]) => (
+          {tabs.map(([k, icon]) => (
             <button key={k} className={tab === k ? 'active' : ''} onClick={() => setTab(k)}>
-              <Icon name={icon} /><span>{label}</span>
+              <Icon name={icon} /><span>{L.nav[k]}</span>
             </button>
           ))}
         </nav>
