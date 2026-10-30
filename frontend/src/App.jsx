@@ -7,6 +7,7 @@ import ReviewPage from './pages/ReviewPage'
 import ScorePage from './pages/ScorePage'
 import ReportPage from './pages/ReportPage'
 import SuggestPage from './pages/SuggestPage'
+import ProfilePage from './pages/ProfilePage'
 
 function Icon({ name }) {
   const p = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round', width: 22, height: 22, viewBox: '0 0 24 24' }
@@ -19,15 +20,6 @@ function Icon({ name }) {
     suggest: <><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.3 11c.7.5 1.3 1.2 1.3 2h4c0-.8.6-1.5 1.3-2A6 6 0 0 0 12 3z" /></>,
   }
   return <svg {...p}>{paths[name]}</svg>
-}
-
-function LangSwitch({ lang, onChange, compact }) {
-  return (
-    <div className={compact ? 'lang-switch compact' : 'lang-switch'}>
-      <button className={lang === 'en' ? 'active' : ''} onClick={() => onChange('en')}>EN</button>
-      <button className={lang === 'zh' ? 'active' : ''} onClick={() => onChange('zh')}>中文</button>
-    </div>
-  )
 }
 
 const COMMON = [
@@ -54,7 +46,6 @@ export default function App() {
     return (
       <main className="login-wrap">
         <div className="card login-card">
-          <LangSwitch lang={lang} onChange={changeLang} />
           <div className="login-mark"><Icon name="schedule" /></div>
           <h1>{L.login.title}</h1>
           <p className="muted">{L.appSub}</p>
@@ -90,15 +81,13 @@ export default function App() {
             </button>
           ))}
         </nav></>)}
-        <LangSwitch lang={lang} onChange={changeLang} />
-        <div className="user-card">
+        <button className="user-card" onClick={() => setTab('profile')}>
           <div className="avatar">{user.name.slice(0, 1)}</div>
-          <div className="user-meta"><b>{user.name}</b><small>{user.is_manager ? L.manager : L.staff}</small></div>
-          <button className="btn2" onClick={logout}>{L.logout}</button>
-        </div>
+          <div className="user-meta"><b>{user.name}</b><small>{user.is_manager ? L.manager : L.staff} · {L.profile.title} ›</small></div>
+        </button>
       </aside>
       <div className="maincol">
-        <header className="mobile-header"><b>{L.appName}</b><LangSwitch lang={lang} onChange={changeLang} compact /></header>
+        <header className="mobile-header"><b>{L.appName}</b><button className="avatar-btn" onClick={() => setTab('profile')}>{user.name.slice(0, 1)}</button></header>
         <main>
           {tab === 'schedule' && <SchedulePage user={user} lang={lang} />}
           {tab === 'today' && <TodayPage user={user} lang={lang} />}
@@ -106,6 +95,7 @@ export default function App() {
           {tab === 'review' && user.is_manager && <ReviewPage lang={lang} />}
           {tab === 'report' && user.is_manager && <ReportPage lang={lang} />}
           {tab === 'suggest' && user.is_manager && <SuggestPage lang={lang} />}
+          {tab === 'profile' && <ProfilePage user={user} lang={lang} onLang={changeLang} onLogout={logout} onBack={() => setTab(user.is_manager ? 'schedule' : 'today')} />}
         </main>
         <nav className="bottom-nav">
           {tabs.map(([k, icon]) => (

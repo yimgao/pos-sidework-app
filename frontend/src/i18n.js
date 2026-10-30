@@ -50,6 +50,10 @@ const T = {
       note: 'Rule-based version generates text first; photo screening is step 2, flags uncertain only.',
       regenerate: "Regenerate Today's Report",
     },
+    profile: {
+      title: 'Profile', language: 'Language', languageNote: 'Tap EN for all English, tap Chinese for all Chinese. Your choice is saved.',
+      name: 'Name', role: 'Role', back: 'Back',
+    },
     suggest: {
       title: 'Next Week Schedule Suggestions (Read-only, does not change the schedule directly)',
       note: 'Schedule module reads the Sidework score once, then suggests, manager approval required. Reduce by half day = one fewer shift; reduce by one day = no shifts that day.',
@@ -93,6 +97,10 @@ const T = {
       title: '每日 AI 总结报告（经理可见）',
       note: '规则版先生成文字；视觉判照片是第二步，只标存疑、不直接判不合格。',
       regenerate: '重新生成今日报告',
+    },
+    profile: {
+      title: '个人资料', language: '语言', languageNote: '点 EN 全英文，点中文全中文。你的选择会被记住。',
+      name: '姓名', role: '身份', back: '返回',
     },
     suggest: {
       title: '下周排班建议（只读建议，不直接改排班表）',
