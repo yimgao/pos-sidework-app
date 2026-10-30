@@ -21,14 +21,14 @@ function Icon({ name }) {
 }
 
 const COMMON = [
-  ['schedule', '排班', 'Schedule', 'schedule'],
-  ['today', '今日', 'Today', 'today'],
-  ['score', '分数', 'Score', 'score'],
+  ['schedule', 'Schedule', '排班', 'schedule'],
+  ['today', 'Today', '今日', 'today'],
+  ['score', 'Score', '分数', 'score'],
 ]
 const MANAGER = [
-  ['review', '复核', 'Review', 'review'],
-  ['report', '报告', 'Report', 'report'],
-  ['suggest', '建议', 'Suggestions', 'suggest'],
+  ['review', 'Review', '复核', 'review'],
+  ['report', 'Report', '报告', 'report'],
+  ['suggest', 'Suggestions', '建议', 'suggest'],
 ]
 
 export default function App() {
@@ -42,14 +42,14 @@ export default function App() {
       <main className="login-wrap">
         <div className="card login-card">
           <div className="login-mark"><Icon name="schedule" /></div>
-          <h1>排班 · Sidework</h1>
-          <p className="muted">Schedule &amp; Sidework，两个独立模块</p>
-          <input inputMode="numeric" placeholder="输入 PIN" value={pin} onChange={(e) => setPin(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') document.getElementById('login-btn').click() }} />
+          <h1>Schedule · Sidework</h1>
+          <p className="muted">Schedule &amp; Sidework, two independent modules 排班 · Sidework，两个独立模块</p>
+          <input inputMode="numeric" placeholder="Enter PIN 输入 PIN" value={pin} onChange={(e) => setPin(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') document.getElementById('login-btn').click() }} />
           <button id="login-btn" className="btn login-btn" onClick={async () => {
             try { const d = await login(pin); setToken(d.token); setUser(d.user); setTab(d.user.is_manager ? 'schedule' : 'today') }
             catch (e) { setMsg(e.message) }
-          }}>进入</button>
-          <p className="muted">演示 PIN：经理 123456 · Anna 1111 · Ben 2222 · Chris 3333</p>
+          }}>Enter 进入</button>
+          <p className="muted">Demo PINs 演示 PIN：Manager 经理 123456 · Anna 1111 · Ben 2222 · Chris 3333</p>
           <p className="muted error">{msg}</p>
         </div>
       </main>
@@ -60,8 +60,8 @@ export default function App() {
   return (
     <div className="layout">
       <aside className="sidebar">
-        <div className="brand"><div className="brand-mark"><Icon name="schedule" /></div><div><b>排班 · Sidework</b><small>Schedule &amp; Sidework</small></div></div>
-        <p className="nav-label">我的</p>
+        <div className="brand"><div className="brand-mark"><Icon name="schedule" /></div><div><b>Schedule · Sidework</b><small>排班 · Sidework</small></div></div>
+        <p className="nav-label">My 我的</p>
         <nav className="side-nav">
           {COMMON.map(([k, label, sub, icon]) => (
             <button key={k} className={tab === k ? 'active' : ''} onClick={() => setTab(k)}>
@@ -69,7 +69,7 @@ export default function App() {
             </button>
           ))}
         </nav>
-        {user.is_manager && (<><p className="nav-label">经理</p><nav className="side-nav">
+        {user.is_manager && (<><p className="nav-label">Manager 经理</p><nav className="side-nav">
           {MANAGER.map(([k, label, sub, icon]) => (
             <button key={k} className={tab === k ? 'active' : ''} onClick={() => setTab(k)}>
               <Icon name={icon} /><span><b>{label}</b><small>{sub}</small></span>
@@ -78,12 +78,12 @@ export default function App() {
         </nav></>)}
         <div className="user-card">
           <div className="avatar">{user.name.slice(0, 1)}</div>
-          <div className="user-meta"><b>{user.name}</b><small>{user.is_manager ? '经理 Manager' : '员工 Staff'}</small></div>
-          <button className="btn2" onClick={logout}>退出</button>
+          <div className="user-meta"><b>{user.name}</b><small>{user.is_manager ? 'Manager 经理' : 'Staff 员工'}</small></div>
+          <button className="btn2" onClick={logout}>Logout 退出</button>
         </div>
       </aside>
       <div className="maincol">
-        <header className="mobile-header"><b>排班 · Sidework</b><span>{user.name}</span></header>
+        <header className="mobile-header"><b>Schedule · Sidework</b><span>{user.name}</span></header>
         <main>
           {tab === 'schedule' && <SchedulePage user={user} />}
           {tab === 'today' && <TodayPage user={user} />}
