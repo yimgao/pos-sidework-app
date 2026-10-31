@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { createSchedule, listEmployees, mondayOf, publishSchedule, scheduleWeek, shiftTemplates } from '../api'
+import { createSchedule, createShiftTemplate, listEmployees, mondayOf, publishSchedule, scheduleWeek, shiftTemplates } from '../api'
 import { dict, displayText } from '../i18n'
 
 export default function SchedulePage({ user, lang }) {
@@ -12,6 +12,13 @@ export default function SchedulePage({ user, lang }) {
   const [newShift, setNewShift] = useState('')
   const [newDate, setNewDate] = useState(mondayOf())
   const [msg, setMsg] = useState('')
+  const [shiftNameEn, setShiftNameEn] = useState('')
+  const [shiftNameZh, setShiftNameZh] = useState('')
+  const [shiftStart, setShiftStart] = useState('14:00')
+  const [shiftEnd, setShiftEnd] = useState('closing')
+  const [shiftEndTime, setShiftEndTime] = useState('22:00')
+  const endLabel = (t) => t.end_time === 'closing' ? (lang === 'zh' ? '关门' : 'Closing') : t.end_time
+  const shiftLabel = (t) => `${displayText(t.name, lang)} ${t.start_time}–${endLabel(t)}`
 
   const load = () => {
     listEmployees().then((list) => {
@@ -38,7 +45,7 @@ export default function SchedulePage({ user, lang }) {
             {employees.filter((e) => !e.is_manager).map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
           </select>
           <select value={newShift} onChange={(e) => setNewShift(e.target.value)}>
-            {templates.map((t) => <option key={t.id} value={t.id}>{displayText(t.name, lang)} {t.start_time}-{t.end_time}</option>)}
+            {templates.map((t) => <option key={t.id} value={t.id}>{shiftLabel(t)}</option>)}
           </select>
           <input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} />
           <button className="btn" onClick={async () => {
@@ -51,6 +58,34 @@ export default function SchedulePage({ user, lang }) {
           }}>{L.publish}</button>
         </div>
       )}
+      {user.is_manager && (
+        <div className="card">
+          <h3>{L.customTitle}</h3>
+          <input placeholder={L.customNameEn} value={shiftNameEn} onChange={(e) => setShiftNameEn(e.target.value)} />
+          <input placeholder={L.customNameZh} value={shiftNameZh} onChange={(e) => setShiftNameZh(e.target.value)} />
+          <label>{L.startTime} <input type="time" value={shiftStart} onChange={(e) => setShiftStart(e.target.value)} /></label>
+          <select value={shiftEnd} onChange={(e) => setShiftEnd(e.target.value)}>
+            <option value="closing">{L.toClosing}</option>
+            <option value="time">{L.endTime}</option>
+          </select>
+          {shiftEnd === 'time' && <input type="time" value={shiftEndTime} onChange={(e) => setShiftEndTime(e.target.value)} />}
+          <button className="btn" onClick={async () => {
+            try {
+              const nameEn = shiftNameEn.trim() || `${shiftStart}–${shiftEnd === 'closing' ? 'Closing' : shiftEndTime}`
+              await createShiftTemplate({ name_en: nameEn, name_zh: shiftNameZh, start_time: shiftStart, end_time: shiftEnd === 'closing' ? 'closing' : shiftEndTime })
+              setShiftNameEn(''); setShiftNameZh(''); setMsg(lang === 'zh' ? '班次已新增，可在上面排班下拉里选。' : 'Shift added, pick it in the schedule dropdown above.'); load()
+            } catch (e) { setMsg(e.message) }
+          }}>{L.addShift}</button>
+          <p className="muted">{L.quick}</p>
+          <div>
+            {['14:00', '15:00', '16:00'].map((s) => (
+              <button key={s} className="btn2" onClick={async () => {
+                try { await createShiftTemplate({ name_en: `${s}–Closing`, name_zh: `${s}到关门`, start_time: s, end_time: 'closing' }); load() } catch (e) { setMsg(e.message) }
+              }}>{s}–{lang === 'zh' ? '关门' : 'Closing'}</button>
+            ))}
+          </div>
+        </div>
+      )}
       <div style={{ overflowX: 'auto' }}>
         <table>
           <thead><tr><th>{L.employee}</th>{L.days.map((d) => <th key={d}>{d}</th>)}</tr></thead>
@@ -60,8 +95,12 @@ export default function SchedulePage({ user, lang }) {
                 {L.days.map((_, i) => {
                   const d = new Date(week); d.setDate(d.getDate() + i)
                   const day = d.toISOString().slice(0, 10)
-                  const items = rows.filter((r) => r.employee_id === e.id && r.date === day)
-                  return <td key={i}>{items.map((r) => displayText(r.shift, lang) + (r.status === 'draft' ? ` (${L.unpublished})` : '')).join('、')}</td>
+                  const items = rows.filter((r) => r.employee_id === e.id && r.date === day && r.status !== 'cancelled')
+                  return <td key={i}>{items.map((r) => {
+                    const end = r.end_time === 'closing' ? (lang === 'zh' ? '关门' : 'Closing') : r.end_time
+                    const time = r.start_time ? ` ${r.start_time}–${end}` : ''
+                    return displayText(r.shift, lang) + time + (r.status === 'draft' ? ` (${L.unpublished})` : '')
+                  }).join('、')}</td>
                 })}
               </tr>
             ))}

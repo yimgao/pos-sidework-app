@@ -23,6 +23,9 @@ const T = {
       title: 'Weekly Schedule', module: 'Schedule module, independent', weekStarting: 'Week starting',
       newDraftNote: 'New schedules are drafts first, publish to make them visible.',
       addTitle: 'Add Schedule (Manager only)', add: 'Add Schedule', publish: 'Publish Week',
+      customTitle: 'Add Custom Shift (Manager only)', customNameEn: 'Shift name (English)', customNameZh: 'Shift name (Chinese, optional)',
+      startTime: 'Start time', endTime: 'End time', toClosing: 'To closing', addShift: 'Add Shift',
+      quick: 'Quick add: 14:00 / 15:00 / 16:00 to closing',
       employee: 'Employee', unpublished: 'Unpublished', days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
     },
     today: {
@@ -85,9 +88,12 @@ const T = {
       future: 'Not in the system yet — manager fills this in later', phone: 'Phone', emergency: 'Emergency contact', hireDate: 'Hire date', payRate: 'Hourly rate',
     },
     suggest: {
-      title: 'Next Week Schedule Suggestions (Read-only, does not change the schedule directly)',
-      note: 'Schedule module reads the Sidework score once, then suggests, manager approval required. Reduce by half day = one fewer shift; reduce by one day = no shifts that day.',
+      title: 'Schedule Suggestions — Adopt or Edit, then Apply to Schedule',
+      note: 'Schedule module reads the Sidework score once, then suggests. Nothing changes until you press Adopt. You can change the action, week, date and shift first, then Apply. Reduce by half day = cancel one shift; reduce by one day = cancel all shifts that day.',
       employee: 'Employee', score: "Today's Score", suggestion: 'Suggestion',
+      action: 'Action', keep: 'Keep schedule', talk: 'Talk first (no change)', reduceHalf: 'Reduce half day (1 shift)', reduceDay: 'Reduce one day (all that day)',
+      week: 'Week starting', date: 'Date', shift: 'Shift to remove', adopt: 'Adopt / Apply to Schedule',
+      applied: 'Applied', cancelled: 'shift(s) cancelled', noShift: 'No shift found for this employee in the selected week.',
     },
   },
   zh: {
@@ -101,6 +107,9 @@ const T = {
       title: '本周排班', module: '排班模块，独立', weekStarting: '周起始',
       newDraftNote: '新增后先是未发布，点“发布本周”员工才看得到。',
       addTitle: '新增排班（仅经理）', add: '新增排班', publish: '发布本周',
+      customTitle: '新增自定义班次（仅经理）', customNameEn: '班次名（英文）', customNameZh: '班次名（中文，可选）',
+      startTime: '开始时间', endTime: '结束时间', toClosing: '到关门', addShift: '新增班次',
+      quick: '快捷新增：14:00 / 15:00 / 16:00 到关门',
       employee: '员工', unpublished: '未发布', days: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
     },
     today: {
@@ -163,9 +172,12 @@ const T = {
       future: '系统里还没有——以后由经理补填', phone: '电话', emergency: '紧急联系人', hireDate: '入职日期', payRate: '时薪',
     },
     suggest: {
-      title: '下周排班建议（只读建议，不直接改排班表）',
-      note: '排班模块读一次 Sidework 分数后给出建议，经理确认后才生效。减半天 = 少一个班次；减一天 = 当天全部班次都不排。',
+      title: '排班建议——可直接采用，也可改完再应用到排班',
+      note: '排班模块读一次 Sidework 分数后给出建议。没点采用之前什么都不会变；你可以先改动作、周、日期和班次，再点应用。减半天 = 取消 1 个班次；减一天 = 取消当天全部班次。',
       employee: '员工', score: '当日分', suggestion: '建议',
+      action: '动作', keep: '正常排班', talk: '先谈话（不改排班）', reduceHalf: '减半天（取消 1 个班次）', reduceDay: '减一天（取消当天全部班次）',
+      week: '周起始', date: '日期', shift: '要取消的班次', adopt: '采用并应用到排班',
+      applied: '已应用', cancelled: '个班次已取消', noShift: '所选周内该员工没有可减的班次。',
     },
   },
 }

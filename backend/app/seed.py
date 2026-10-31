@@ -36,7 +36,11 @@ def seed():
         lunch = ShiftTemplate(name="Lunch || 午市", start_time="11:00", end_time="15:00", role="server")
         dinner = ShiftTemplate(name="Dinner || 晚市", start_time="16:00", end_time="22:00", role="server")
         closing = ShiftTemplate(name="Closing || 打烊", start_time="16:00", end_time="23:00", role="server")
-        db.add_all([lunch, dinner, closing]); db.flush()
+        # 用户要的班次口径：上午半天、晚上、全天（原 Lunch/Dinner/Closing 保留，旧排班不断）
+        morning = ShiftTemplate(name="Morning Half Day || 上午半天", start_time="11:00", end_time="15:00", role="server")
+        evening = ShiftTemplate(name="Evening || 晚上", start_time="16:00", end_time="22:00", role="server")
+        fullday = ShiftTemplate(name="Full Day || 全天", start_time="11:00", end_time="22:00", role="server")
+        db.add_all([lunch, dinner, closing, morning, evening, fullday]); db.flush()
         # 演示分组：开店=A、进行中=B、打烊=C，D 组留给经理自己加真实清单。
         group_map = {"opening": "A", "running": "B", "closing": "C"}
         for cat, role, title, photo, order in TASKS:
