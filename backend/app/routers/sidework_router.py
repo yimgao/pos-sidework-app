@@ -41,8 +41,8 @@ class TemplateIn(BaseModel):
 
 @router.post("/templates")
 def create_template(body: TemplateIn, db: Session = Depends(get_db), manager: Employee = Depends(require_manager)):
-    if body.group_letter not in ("A", "B", "C", "D"):
-        raise HTTPException(status_code=400, detail="分组只能是 A / B / C / D")
+    if body.group_letter not in ("A", "B", "C", "D", "E"):
+        raise HTTPException(status_code=400, detail="分组只能是 A / B / C / D / E")
     title = body.title_en.strip()
     if body.title_zh.strip():
         title = f"{title} || {body.title_zh.strip()}"

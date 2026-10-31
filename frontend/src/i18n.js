@@ -60,6 +60,7 @@ const T = {
       photoRequired: 'Photo / video required', add: 'Add Task', delete: 'Delete', onShift: 'On shift today', notOnShift: 'Not on shift',
       assignTitle: 'Assign for a day', date: 'Date', employee: 'Employee', saveAssign: 'Save Assignment', saved: 'Assignment saved.',
       assignedCount: 'assigned', emptyAssign: 'No tasks assigned to this employee on this day yet.',
+      collapseAll: 'Collapse all groups', expandAll: 'Expand all groups',
       note: 'Tasks rarely change, but the manager can add or delete them. Deleting only deactivates a task, history is kept. Once anyone is assigned on a day, that day runs on assignments only.',
     },
     draft: {
@@ -137,6 +138,7 @@ const T = {
       photoRequired: '必传照片 / 视频', add: '新增任务', delete: '删除', onShift: '当天上班', notOnShift: '当天不上班',
       assignTitle: '按天分配', date: '日期', employee: '员工', saveAssign: '保存分配', saved: '分配已保存。',
       assignedCount: '项已分配', emptyAssign: '该员工这天还没有被分配任务。',
+      collapseAll: '全部收起', expandAll: '全部展开',
       note: 'Sidework 平时不太变，但经理可以增删。删除只是停用，历史记录保留。当天只要有人被分配，这天就只按分配走。',
     },
     draft: {
