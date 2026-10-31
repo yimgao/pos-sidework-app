@@ -62,7 +62,8 @@ def list_schedule(week_start: datetime.date, db: Session = Depends(get_db), user
         tpl = db.query(ShiftTemplate).filter(ShiftTemplate.id == s.shift_template_id).first()
         emp = db.query(Employee).filter(Employee.id == s.employee_id).first()
         out.append({"id": s.id, "employee_id": s.employee_id, "employee_name": emp.name if emp else "",
-                    "shift": tpl.name if tpl else "", "start_time": tpl.start_time if tpl else "",
+                    "shift": tpl.name if tpl else "", "shift_template_id": s.shift_template_id,
+                    "start_time": tpl.start_time if tpl else "",
                     "end_time": tpl.end_time if tpl else "", "date": str(s.date), "status": s.status})
     return out
 
@@ -72,6 +73,33 @@ def create_schedule(body: ScheduleIn, db: Session = Depends(get_db), manager: Em
     s = Schedule(employee_id=body.employee_id, shift_template_id=body.shift_template_id, date=body.date, status="draft")
     db.add(s); db.commit(); db.refresh(s)
     return {"id": s.id, "status": s.status}
+
+
+class SchedulePatch(BaseModel):
+    shift_template_id: int
+
+
+@router.patch("/{schedule_id}")
+def update_schedule(schedule_id: int, body: SchedulePatch, db: Session = Depends(get_db), manager: Employee = Depends(require_manager)):
+    """Excel 式格子编辑：点格子直接换班次，状态不变（已发布改完立刻生效，草稿改完仍是草稿）。"""
+    s = db.query(Schedule).filter(Schedule.id == schedule_id).first()
+    if not s or s.status == "cancelled":
+        raise HTTPException(status_code=404, detail="排班不存在或已取消")
+    tpl = db.query(ShiftTemplate).filter(ShiftTemplate.id == body.shift_template_id).first()
+    if not tpl:
+        raise HTTPException(status_code=404, detail="班次不存在")
+    s.shift_template_id = body.shift_template_id; db.commit()
+    return {"id": s.id, "shift_template_id": s.shift_template_id, "status": s.status}
+
+
+@router.delete("/{schedule_id}")
+def delete_schedule(schedule_id: int, db: Session = Depends(get_db), manager: Employee = Depends(require_manager)):
+    """格子里的 ×：取消该班次（留痕，员工端不再看到，可再加回来）。"""
+    s = db.query(Schedule).filter(Schedule.id == schedule_id).first()
+    if not s:
+        raise HTTPException(status_code=404, detail="排班不存在")
+    s.status = "cancelled"; db.commit()
+    return {"id": s.id, "status": "cancelled"}
 
 
 @router.post("/publish")

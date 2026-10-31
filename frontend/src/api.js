@@ -42,6 +42,8 @@ export const scheduleWeek = (weekStart) => api('/api/schedule?week_start=' + wee
 export const shiftTemplates = () => api('/api/schedule/templates')
 export const createShiftTemplate = (body) => api('/api/schedule/templates', { method: 'POST', body })
 export const createSchedule = (body) => api('/api/schedule', { method: 'POST', body })
+export const updateSchedule = (id, body) => api('/api/schedule/' + id, { method: 'PATCH', body })
+export const deleteSchedule = (id) => api('/api/schedule/' + id, { method: 'DELETE' })
 export const publishSchedule = (weekStart) => api('/api/schedule/publish?week_start=' + weekStart, { method: 'POST' })
 export const rollingMe = (day) => api('/api/scores/rolling/me' + (day ? '?day=' + day : ''))
 export const rollingAll = (day) => api('/api/scores/rolling/all' + (day ? '?day=' + day : ''))

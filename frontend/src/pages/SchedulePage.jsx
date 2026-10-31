@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { createSchedule, createShiftTemplate, listEmployees, mondayOf, publishSchedule, scheduleWeek, shiftTemplates } from '../api'
+import { createSchedule, createShiftTemplate, deleteSchedule, listEmployees, mondayOf, publishSchedule, scheduleWeek, shiftTemplates, updateSchedule } from '../api'
 import { dict, displayText } from '../i18n'
 
 export default function SchedulePage({ user, lang }) {
@@ -18,6 +18,9 @@ export default function SchedulePage({ user, lang }) {
   const [shiftEnd, setShiftEnd] = useState('closing')
   const [shiftEndTime, setShiftEndTime] = useState('22:00')
   // 班次只显示名字，不带时间段；自定义时间由经理在下面的自定义班次里另选。
+  // Excel 式格子编辑：点格子进入编辑态，改班次、删班次、加班次都在格子里完成。
+  const [editCell, setEditCell] = useState(null) // {employeeId, date}
+  const [cellAddShift, setCellAddShift] = useState('')
 
   const load = () => {
     listEmployees().then((list) => {
@@ -85,8 +88,9 @@ export default function SchedulePage({ user, lang }) {
           </div>
         </div>
       )}
+      {user.is_manager && <p className="muted">{L.clickToEdit}</p>}
       <div style={{ overflowX: 'auto' }}>
-        <table>
+        <table className="schedule-grid">
           <thead><tr><th>{L.employee}</th>{L.days.map((d) => <th key={d}>{d}</th>)}</tr></thead>
           <tbody>
             {employees.filter((e) => !e.is_manager).map((e) => (
@@ -95,7 +99,40 @@ export default function SchedulePage({ user, lang }) {
                   const d = new Date(week); d.setDate(d.getDate() + i)
                   const day = d.toISOString().slice(0, 10)
                   const items = rows.filter((r) => r.employee_id === e.id && r.date === day && r.status !== 'cancelled')
-                  return <td key={i}>{items.map((r) => displayText(r.shift, lang) + (r.status === 'draft' ? ` (${L.unpublished})` : '')).join('、')}</td>
+                  const isEditing = user.is_manager && editCell && editCell.employeeId === e.id && editCell.date === day
+                  if (!user.is_manager) {
+                    return <td key={i}>{items.map((r) => displayText(r.shift, lang)).join('、')}</td>
+                  }
+                  if (!isEditing) {
+                    return (
+                      <td key={i} className="grid-cell" onClick={() => { setEditCell({ employeeId: e.id, date: day }); setCellAddShift(templates[0]?.id || '') }}>
+                        {items.map((r) => <div key={r.id}>{displayText(r.shift, lang)}{r.status === 'draft' ? ` (${L.unpublished})` : ''}</div>)}
+                        {!items.length && <span className="muted">+</span>}
+                      </td>
+                    )
+                  }
+                  return (
+                    <td key={i} className="grid-cell editing">
+                      {items.map((r) => (
+                        <div key={r.id} style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
+                          <select value={r.shift_template_id} onChange={async (ev) => { try { await updateSchedule(r.id, { shift_template_id: Number(ev.target.value) }); load() } catch (err) { setMsg(err.message) } }}>
+                            {templates.map((t) => <option key={t.id} value={t.id}>{displayText(t.name, lang)}</option>)}
+                          </select>
+                          <button className="btn2" onClick={async () => { try { await deleteSchedule(r.id); load() } catch (err) { setMsg(err.message) } }}>×</button>
+                        </div>
+                      ))}
+                      <div style={{ display: 'flex', gap: 4 }}>
+                        <select value={cellAddShift} onChange={(ev) => setCellAddShift(ev.target.value)}>
+                          {templates.map((t) => <option key={t.id} value={t.id}>{displayText(t.name, lang)}</option>)}
+                        </select>
+                        <button className="btn2" onClick={async () => {
+                          try { await createSchedule({ employee_id: e.id, shift_template_id: Number(cellAddShift || templates[0]?.id), date: day }); load() }
+                          catch (err) { setMsg(err.message) }
+                        }}>+</button>
+                      </div>
+                      <button className="btn2" onClick={() => setEditCell(null)}>{L.done}</button>
+                    </td>
+                  )
                 })}
               </tr>
             ))}
