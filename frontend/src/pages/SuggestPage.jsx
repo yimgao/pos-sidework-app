@@ -51,7 +51,7 @@ export default function SuggestPage({ lang }) {
                 {e.action === 'minus_half_day' && (
                   <select value={e.shiftId} onChange={(ev) => setEdit(r.employee_id, { shiftId: ev.target.value })}>
                     <option value="">{shifts.length ? L.shift : L.noShift}</option>
-                    {shifts.map((s) => <option key={s.id} value={s.id}>{s.date} · {displayText(s.shift, lang)} {s.start_time}–{s.end_time}</option>)}
+                    {shifts.map((s) => <option key={s.id} value={s.id}>{s.date} · {displayText(s.shift, lang)}</option>)}
                   </select>
                 )}
               </div>

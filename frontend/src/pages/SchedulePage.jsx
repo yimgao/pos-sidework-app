@@ -17,8 +17,7 @@ export default function SchedulePage({ user, lang }) {
   const [shiftStart, setShiftStart] = useState('14:00')
   const [shiftEnd, setShiftEnd] = useState('closing')
   const [shiftEndTime, setShiftEndTime] = useState('22:00')
-  const endLabel = (t) => t.end_time === 'closing' ? (lang === 'zh' ? '关门' : 'Closing') : t.end_time
-  const shiftLabel = (t) => `${displayText(t.name, lang)} ${t.start_time}–${endLabel(t)}`
+  // 班次只显示名字，不带时间段；自定义时间由经理在下面的自定义班次里另选。
 
   const load = () => {
     listEmployees().then((list) => {
@@ -45,7 +44,7 @@ export default function SchedulePage({ user, lang }) {
             {employees.filter((e) => !e.is_manager).map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
           </select>
           <select value={newShift} onChange={(e) => setNewShift(e.target.value)}>
-            {templates.map((t) => <option key={t.id} value={t.id}>{shiftLabel(t)}</option>)}
+            {templates.map((t) => <option key={t.id} value={t.id}>{displayText(t.name, lang)}</option>)}
           </select>
           <input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} />
           <button className="btn" onClick={async () => {
@@ -71,7 +70,7 @@ export default function SchedulePage({ user, lang }) {
           {shiftEnd === 'time' && <input type="time" value={shiftEndTime} onChange={(e) => setShiftEndTime(e.target.value)} />}
           <button className="btn" onClick={async () => {
             try {
-              const nameEn = shiftNameEn.trim() || `${shiftStart}–${shiftEnd === 'closing' ? 'Closing' : shiftEndTime}`
+              const nameEn = shiftNameEn.trim() || 'Custom shift'
               await createShiftTemplate({ name_en: nameEn, name_zh: shiftNameZh, start_time: shiftStart, end_time: shiftEnd === 'closing' ? 'closing' : shiftEndTime })
               setShiftNameEn(''); setShiftNameZh(''); setMsg(lang === 'zh' ? '班次已新增，可在上面排班下拉里选。' : 'Shift added, pick it in the schedule dropdown above.'); load()
             } catch (e) { setMsg(e.message) }
@@ -96,11 +95,7 @@ export default function SchedulePage({ user, lang }) {
                   const d = new Date(week); d.setDate(d.getDate() + i)
                   const day = d.toISOString().slice(0, 10)
                   const items = rows.filter((r) => r.employee_id === e.id && r.date === day && r.status !== 'cancelled')
-                  return <td key={i}>{items.map((r) => {
-                    const end = r.end_time === 'closing' ? (lang === 'zh' ? '关门' : 'Closing') : r.end_time
-                    const time = r.start_time ? ` ${r.start_time}–${end}` : ''
-                    return displayText(r.shift, lang) + time + (r.status === 'draft' ? ` (${L.unpublished})` : '')
-                  }).join('、')}</td>
+                  return <td key={i}>{items.map((r) => displayText(r.shift, lang) + (r.status === 'draft' ? ` (${L.unpublished})` : '')).join('、')}</td>
                 })}
               </tr>
             ))}

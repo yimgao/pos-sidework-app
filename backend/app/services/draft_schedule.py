@@ -31,6 +31,12 @@ def _find_shift(seg: str, templates) -> object:
         base = t.name.split(" || ")[0].strip().lower()
         if base and base in low:
             return t
+    # 班次只叫名字（如 Lunch shift）：要求里只写 Lunch / Dinner 也要能认出来。
+    for t in templates:
+        base = t.name.split(" || ")[0].strip().lower()
+        first = base.split()[0] if base else ""
+        if first and re.search(r"\b" + re.escape(first) + r"\b", low):
+            return t
     if "打烊" in seg or "收尾" in seg or "closing" in low:
         for t in templates:
             if "closing" in t.name.lower():
