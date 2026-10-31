@@ -16,6 +16,23 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 Base = declarative_base()
 
 
+def ensure_new_columns():
+    """轻量迁移：老数据库没有新字段时补列，不删数据、不重建表。"""
+    from sqlalchemy import inspect, text
+
+    try:
+        cols = {c["name"] for c in inspect(engine).get_columns("sidework_templates")}
+    except Exception:
+        return
+    if not cols:
+        return
+    with engine.begin() as conn:
+        if "group_letter" not in cols:
+            conn.execute(text("ALTER TABLE sidework_templates ADD COLUMN group_letter VARCHAR(10) DEFAULT 'A'"))
+        if "is_active" not in cols:
+            conn.execute(text("ALTER TABLE sidework_templates ADD COLUMN is_active BOOLEAN DEFAULT 1"))
+
+
 def get_db():
     db = SessionLocal()
     try:

@@ -8,6 +8,7 @@ import ScorePage from './pages/ScorePage'
 import ReportPage from './pages/ReportPage'
 import SuggestPage from './pages/SuggestPage'
 import DraftPage from './pages/DraftPage'
+import TasksPage from './pages/TasksPage'
 import ProfilePage from './pages/ProfilePage'
 
 function Icon({ name }) {
@@ -33,6 +34,7 @@ const MANAGER = [
   ['report', 'report'],
   ['suggest', 'suggest'],
   ['draft', 'suggest'],
+  ['tasks', 'today'],
 ]
 
 export default function App() {
@@ -98,6 +100,7 @@ export default function App() {
           {tab === 'report' && user.is_manager && <ReportPage lang={lang} />}
           {tab === 'suggest' && user.is_manager && <SuggestPage lang={lang} />}
           {tab === 'draft' && user.is_manager && <DraftPage lang={lang} />}
+          {tab === 'tasks' && user.is_manager && <TasksPage lang={lang} />}
           {tab === 'profile' && <ProfilePage user={user} lang={lang} onLang={changeLang} onLogout={logout} onBack={() => setTab(user.is_manager ? 'schedule' : 'today')} />}
         </main>
         <nav className="bottom-nav">

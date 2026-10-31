@@ -14,6 +14,7 @@ main{padding:20px;max-width:1080px;margin:0 auto}
 .muted{color:var(--secondary);font-size:14px}
 .error{color:var(--red)}
 input,select,textarea{width:100%;padding:12px 14px;margin:6px 0;border:1px solid transparent;border-radius:12px;font-size:16px;background:var(--fill);color:var(--text)}
+input[type=checkbox]{width:auto;margin:0 8px 0 0;vertical-align:middle}
 input:focus,select:focus,textarea:focus{outline:2px solid rgba(0,122,255,.35);background:#fff}
 button.btn{background:var(--blue);color:#fff;border:0;padding:12px 20px;border-radius:12px;font-size:16px;font-weight:600;margin:6px 6px 6px 0}
 button.btn2{background:#E8E8ED;color:var(--text);border:0;padding:9px 14px;border-radius:10px;font-size:14px;font-weight:500;margin:4px 4px 4px 0}

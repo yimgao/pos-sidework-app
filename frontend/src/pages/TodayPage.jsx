@@ -17,9 +17,12 @@ export default function TodayPage({ user, lang }) {
   return (
     <div className="card">
       <h2>{L.title}：{user.name} · {data.date}</h2>
+      <p className="muted">{data.assigned_mode ? L.assignedNote : L.allNote}</p>
       <p className="muted">{L.photoNote} {msg}</p>
+      {!data.items.length && <p className="muted">{data.assigned_mode ? L.assignedNote : ''}</p>}
       {data.items.map((it) => {
-        const head = it.category !== cur ? (cur = it.category, <h3 key={'h' + it.category}>{L.categories[it.category] || it.category}</h3>) : null
+        const grp = it.group_letter || 'A'
+        const head = grp !== cur ? (cur = grp, <h3 key={'h' + grp}>{L.group} {grp}</h3>) : null
         const status = it.status === 'done' && it.review === 'pass' ? <span className="tag ok">{L.approved}</span>
           : it.status === 'done' && it.review === 'fail' ? <span className="tag bad">{L.rejected}：{it.review_note}</span>
           : it.status === 'done' ? <span className="tag warn">{L.pendingReview}</span> : <span className="tag">{L.pending}</span>

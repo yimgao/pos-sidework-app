@@ -8,7 +8,7 @@ from ..models import SideworkRecord, SideworkTemplate
 
 
 def score_for_day(db: Session, employee_id: int, day) -> dict:
-    templates = db.query(SideworkTemplate).all()
+    templates = db.query(SideworkTemplate).filter(SideworkTemplate.is_active == True).all()  # noqa: E712
     total = len(templates)
     records = db.query(SideworkRecord).filter(
         SideworkRecord.employee_id == employee_id, SideworkRecord.date == day

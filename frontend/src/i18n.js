@@ -16,7 +16,7 @@ const T = {
     appName: 'Schedule · Sidework',
     appSub: 'Schedule & Sidework, two independent modules',
     my: 'My', manager: 'Manager', staff: 'Staff', logout: 'Logout',
-    nav: { schedule: 'Schedule', today: 'Today', score: 'Score', review: 'Review', report: 'Report', suggestions: 'Suggestions', suggest: 'Suggestions', draft: 'AI Draft' },
+    nav: { schedule: 'Schedule', today: 'Today', score: 'Score', review: 'Review', report: 'Report', suggestions: 'Suggestions', suggest: 'Suggestions', draft: 'AI Draft', tasks: 'Tasks' },
     login: { title: 'Schedule · Sidework', enterPin: 'Enter PIN', enter: 'Enter', demo: 'Demo PINs: Manager 123456 · Anna 1111 · Ben 2222 · Chris 3333', wrongPin: 'Wrong PIN' },
     loading: 'Loading…',
     schedule: {
@@ -27,6 +27,8 @@ const T = {
     },
     today: {
       title: "Today's Sidework", managerNote: 'Managers, please go to Review. Staff complete today\'s checklist here.',
+      assignedNote: 'Only your assigned tasks are shown today.', allNote: 'No assignments today, showing the full checklist.',
+      group: 'Group',
       photoNote: 'Photo/video required items must upload before marking complete.',
       categories: { opening: 'Opening', running: 'Running', closing: 'Closing' },
       approved: 'Approved', rejected: 'Rejected', pendingReview: 'Pending Review', pending: 'Pending',
@@ -51,6 +53,14 @@ const T = {
       title: 'Daily AI Summary Report (Manager only)',
       note: 'Rule-based version generates text first; photo screening is step 2, flags uncertain only.',
       regenerate: "Regenerate Today's Report", email: 'Email Report to Manager', emailSent: 'Sent', emailPreview: 'Preview only (SMTP not configured)',
+    },
+    tasks: {
+      title: 'Sidework Tasks & Daily Assignment (Manager only)',
+      addTitle: 'Add a task', group: 'Group', titleEn: 'Task name (English)', titleZh: 'Task name (Chinese, optional)',
+      photoRequired: 'Photo / video required', add: 'Add Task', delete: 'Delete', onShift: 'On shift today', notOnShift: 'Not on shift',
+      assignTitle: 'Assign for a day', date: 'Date', employee: 'Employee', saveAssign: 'Save Assignment', saved: 'Assignment saved.',
+      assignedCount: 'assigned', emptyAssign: 'No tasks assigned to this employee on this day yet.',
+      note: 'Tasks rarely change, but the manager can add or delete them. Deleting only deactivates a task, history is kept. Once anyone is assigned on a day, that day runs on assignments only.',
     },
     draft: {
       title: 'AI Draft Schedule (Manager only)', note: 'Say one requirement, e.g. Anna Wednesday Dinner, Ben Friday Lunch. AI drafts with a reason per entry. Approving only creates schedule drafts — you still publish the week. Rejecting creates nothing.',
@@ -83,7 +93,7 @@ const T = {
     appName: '排班 · Sidework',
     appSub: '排班 · Sidework，两个独立模块',
     my: '我的', manager: '经理', staff: '员工', logout: '退出',
-    nav: { schedule: '排班', today: '今日', score: '分数', review: '复核', report: '报告', suggestions: '建议', suggest: '建议', draft: 'AI 起草' },
+    nav: { schedule: '排班', today: '今日', score: '分数', review: '复核', report: '报告', suggestions: '建议', suggest: '建议', draft: 'AI 起草', tasks: '任务分配' },
     login: { title: '排班 · Sidework', enterPin: '输入 PIN', enter: '进入', demo: '演示 PIN：经理 123456 · Anna 1111 · Ben 2222 · Chris 3333', wrongPin: 'PIN 不对' },
     loading: '加载中…',
     schedule: {
@@ -94,6 +104,8 @@ const T = {
     },
     today: {
       title: '今日 Sidework', managerNote: '经理请去“复核”页。员工登录后在这里做自己当天的清单。',
+      assignedNote: '今天只显示经理分配给你的任务。', allNote: '今天没有分配，显示全部清单。',
+      group: '组',
       photoNote: '必传项必须传照片或视频才能点完成。',
       categories: { opening: '开店', running: '进行中', closing: '打烊' },
       approved: '复核通过', rejected: '打回', pendingReview: '待复核', pending: '待做',
@@ -118,6 +130,14 @@ const T = {
       title: '每日 AI 总结报告（经理可见）',
       note: '规则版先生成文字；视觉判照片是第二步，只标存疑、不直接判不合格。',
       regenerate: '重新生成今日报告', email: '把报告发邮件给经理', emailSent: '已发送', emailPreview: '仅预览（未配 SMTP，未发送）',
+    },
+    tasks: {
+      title: 'Sidework 任务与每日分配（经理可见）',
+      addTitle: '新增任务', group: '分组', titleEn: '任务名（英文）', titleZh: '任务名（中文，可选）',
+      photoRequired: '必传照片 / 视频', add: '新增任务', delete: '删除', onShift: '当天上班', notOnShift: '当天不上班',
+      assignTitle: '按天分配', date: '日期', employee: '员工', saveAssign: '保存分配', saved: '分配已保存。',
+      assignedCount: '项已分配', emptyAssign: '该员工这天还没有被分配任务。',
+      note: 'Sidework 平时不太变，但经理可以增删。删除只是停用，历史记录保留。当天只要有人被分配，这天就只按分配走。',
     },
     draft: {
       title: 'AI 起草排班（经理可见）', note: '说一句话需求，例如：Anna 周三 Dinner，Ben 周五 Lunch。AI 每条带理由起草。批准只生成排班草稿，还要去排班页发布；驳回不生成任何排班。',

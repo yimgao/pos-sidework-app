@@ -4,7 +4,7 @@ import datetime
 from sqlalchemy.orm import Session
 
 from .auth import hash_pin
-from .database import Base, SessionLocal, engine
+from .database import Base, SessionLocal, engine, ensure_new_columns
 from .models import Employee, Schedule, ShiftTemplate, SideworkTemplate
 
 TASKS = [
@@ -23,6 +23,7 @@ TASKS = [
 
 def seed():
     Base.metadata.create_all(bind=engine)
+    ensure_new_columns()
     db: Session = SessionLocal()
     try:
         if db.query(Employee).count():
@@ -36,8 +37,11 @@ def seed():
         dinner = ShiftTemplate(name="Dinner || 晚市", start_time="16:00", end_time="22:00", role="server")
         closing = ShiftTemplate(name="Closing || 打烊", start_time="16:00", end_time="23:00", role="server")
         db.add_all([lunch, dinner, closing]); db.flush()
+        # 演示分组：开店=A、进行中=B、打烊=C，D 组留给经理自己加真实清单。
+        group_map = {"opening": "A", "running": "B", "closing": "C"}
         for cat, role, title, photo, order in TASKS:
-            db.add(SideworkTemplate(category=cat, role=role, title=title, requires_photo=photo, sort_order=order))
+            db.add(SideworkTemplate(category=cat, role=role, title=title, requires_photo=photo, sort_order=order,
+                                    group_letter=group_map.get(cat, "A")))
         today = datetime.date.today()
         monday = today - datetime.timedelta(days=today.weekday())
         plan = [(anna.id, 0, dinner.id), (anna.id, 2, dinner.id), (anna.id, 4, dinner.id), (anna.id, 5, dinner.id),

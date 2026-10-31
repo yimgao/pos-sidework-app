@@ -43,11 +43,27 @@ class Schedule(Base):
 class SideworkTemplate(Base):
     __tablename__ = "sidework_templates"
     id = Column(Integer, primary_key=True)
-    category = Column(String(20), nullable=False)  # opening / running / closing
+    category = Column(String(20), nullable=False)  # opening / running / closing (老字段，保留兼容)
     role = Column(String(50), default="all")
     title = Column(String(200), nullable=False)
     requires_photo = Column(Boolean, default=False)
     sort_order = Column(Integer, default=0)
+    group_letter = Column(String(10), default="A")  # A / B / C / D，经理加任务时选组
+    is_active = Column(Boolean, default=True)  # 经理“删” = 停用，不删历史记录
+
+
+class SideworkAssignment(Base):
+    """经理每日匹配：某天某员工要做哪几项。员工今日只看自己被分配的项。
+
+    当天没有任何分配时，员工今日页回落到全部在用清单（老行为），
+    一旦当天有人被分配，该天就按分配走、没被分配的员工当天无任务。
+    """
+    __tablename__ = "sidework_assignments"
+    id = Column(Integer, primary_key=True)
+    employee_id = Column(Integer, ForeignKey("employees.id"), nullable=False)
+    template_id = Column(Integer, ForeignKey("sidework_templates.id"), nullable=False)
+    date = Column(Date, nullable=False)
+    assigned_by = Column(Integer, nullable=True)
 
 
 class SideworkRecord(Base):
