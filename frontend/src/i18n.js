@@ -53,6 +53,16 @@ const T = {
     profile: {
       title: 'Profile', language: 'Language', languageNote: 'Tap EN for all English, tap Chinese for all Chinese. Your choice is saved.',
       name: 'Name', role: 'Role', back: 'Back',
+      account: 'My Account', loginMethod: 'Login method', pinLogin: 'PIN login', status: 'Status', active: 'Active',
+      myScore: 'My Score Today', completed: 'Completed today', reviewed: 'Reviewed', passed: 'Passed',
+      myWeek: 'My Shifts This Week', publishedShifts: 'published shifts',
+      canDo: 'What I Can Do', cannotDo: 'What I Cannot Do',
+      empCan: ['View only my own schedule', 'Do today\'s sidework and upload photo / video evidence', 'View only my own score', 'Change language in this profile'],
+      empCannot: ['View other staff schedules or scores', 'Edit or publish schedules', 'Review other staff sidework', 'See or change pay rates', 'See anyone\'s PIN (PINs are hashed)'],
+      team: 'Team Overview', activeStaff: 'active staff', pendingReviews: 'pending reviews', teamScoreNote: 'Scores and reviews are in the Score / Review pages.',
+      mgrCan: ['Create and publish schedules', 'Review sidework (approve / reject / mark late)', 'View all staff scores', 'Generate the daily report', 'View schedule suggestions (approval required before any change)'],
+      mgrCannot: ['Let AI publish, reduce, fail, message or deduct pay automatically — every AI action needs manager approval', 'See anyone\'s PIN (PINs are hashed)'],
+      future: 'Not in the system yet — manager fills this in later', phone: 'Phone', emergency: 'Emergency contact', hireDate: 'Hire date', payRate: 'Hourly rate',
     },
     suggest: {
       title: 'Next Week Schedule Suggestions (Read-only, does not change the schedule directly)',
@@ -101,6 +111,16 @@ const T = {
     profile: {
       title: '个人资料', language: '语言', languageNote: '点 EN 全英文，点中文全中文。你的选择会被记住。',
       name: '姓名', role: '身份', back: '返回',
+      account: '我的账号', loginMethod: '登录方式', pinLogin: 'PIN 登录', status: '状态', active: '在职',
+      myScore: '我今天的分数', completed: '今天完成', reviewed: '已复核', passed: '通过',
+      myWeek: '我本周的班', publishedShifts: '个已发布班次',
+      canDo: '我可以做什么', cannotDo: '我不可以做什么',
+      empCan: ['只看自己的排班', '做当天的 sidework，传照片 / 视频作证据', '只看自己的分数', '在这个 Profile 里换语言'],
+      empCannot: ['看其他员工的排班或分数', '改排班或发布排班', '复核其他员工的 sidework', '看或改工资', '看任何人的 PIN（PIN 只存哈希）'],
+      team: '团队总览', activeStaff: '名在职员工', pendingReviews: '条待复核', teamScoreNote: '分数和复核详情在分数 / 复核页里看。',
+      mgrCan: ['新建和发布排班', '复核 sidework（通过 / 打回 / 标迟交）', '看全员分数', '生成每日报告', '看排班建议（任何改动都要经理确认才生效）'],
+      mgrCannot: ['让 AI 自动发布、减班、判不合格、发消息或扣钱——所有 AI 动作都要经理确认', '看任何人的 PIN（PIN 只存哈希）'],
+      future: '系统里还没有——以后由经理补填', phone: '电话', emergency: '紧急联系人', hireDate: '入职日期', payRate: '时薪',
     },
     suggest: {
       title: '下周排班建议（只读建议，不直接改排班表）',
