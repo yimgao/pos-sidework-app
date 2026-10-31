@@ -68,26 +68,28 @@ export default function App() {
   const logout = () => { clearToken(); setUser(null) }
   return (
     <div className="layout">
-      {/* 电脑端：顶部居中横向导航（不再是左侧竖栏） */}
-      <header className="topbar">
-        <div className="topbar-inner">
-          <div className="brand"><div className="brand-mark"><Icon name="schedule" /></div><div><b>{L.appName}</b><small>{lang === 'en' ? 'Schedule & Sidework' : '排班 · Sidework'}</small></div></div>
-          <nav className="top-nav">
-            {COMMON.map(([k, icon]) => (
-              <button key={k} className={tab === k ? 'active' : ''} onClick={() => setTab(k)}>
-                <Icon name={icon} /><span>{L.nav[k]}</span>
-              </button>
-            ))}
-            {user.is_manager && (<><span className="top-sep" />
-              {MANAGER.map(([k, icon]) => (
-                <button key={k} className={tab === k ? 'active' : ''} onClick={() => setTab(k)}>
-                  <Icon name={icon} /><span>{L.nav[k]}</span>
-                </button>
-              ))}</>)}
-          </nav>
-          <button className="avatar-btn top-avatar" onClick={() => setTab('profile')} title={L.profile.title}>{user.name.slice(0, 1)}</button>
-        </div>
-      </header>
+      <aside className="sidebar">
+        <div className="brand"><div className="brand-mark"><Icon name="schedule" /></div><div><b>{L.appName}</b><small>{lang === 'en' ? 'Schedule & Sidework' : '排班 · Sidework'}</small></div></div>
+        <p className="nav-label">{L.my}</p>
+        <nav className="side-nav">
+          {COMMON.map(([k, icon]) => (
+            <button key={k} className={tab === k ? 'active' : ''} onClick={() => setTab(k)}>
+              <Icon name={icon} /><span><b>{L.nav[k]}</b></span>
+            </button>
+          ))}
+        </nav>
+        {user.is_manager && (<><p className="nav-label">{L.manager}</p><nav className="side-nav">
+          {MANAGER.map(([k, icon]) => (
+            <button key={k} className={tab === k ? 'active' : ''} onClick={() => setTab(k)}>
+              <Icon name={icon} /><span><b>{L.nav[k]}</b></span>
+            </button>
+          ))}
+        </nav></>)}
+        <button className="user-card" onClick={() => setTab('profile')}>
+          <div className="avatar">{user.name.slice(0, 1)}</div>
+          <div className="user-meta"><b>{user.name}</b><small>{user.is_manager ? L.manager : L.staff} · {L.profile.title} ›</small></div>
+        </button>
+      </aside>
       <div className="maincol">
         <header className="mobile-header"><b>{L.appName}</b><button className="avatar-btn" onClick={() => setTab('profile')}>{user.name.slice(0, 1)}</button></header>
         <main>
