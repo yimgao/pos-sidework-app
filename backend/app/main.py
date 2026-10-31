@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from .routers import auth_router, employees_router, report_router, review_router, schedule_router, sidework_router
+from .routers import ai_router, auth_router, employees_router, report_router, review_router, schedule_router, sidework_router
 from .seed import seed
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -22,6 +22,7 @@ def startup():
     seed()
 
 
+app.include_router(ai_router.router)
 app.include_router(auth_router.router)
 app.include_router(employees_router.router)
 app.include_router(schedule_router.router)

@@ -7,6 +7,7 @@ import ReviewPage from './pages/ReviewPage'
 import ScorePage from './pages/ScorePage'
 import ReportPage from './pages/ReportPage'
 import SuggestPage from './pages/SuggestPage'
+import DraftPage from './pages/DraftPage'
 import ProfilePage from './pages/ProfilePage'
 
 function Icon({ name }) {
@@ -30,7 +31,8 @@ const COMMON = [
 const MANAGER = [
   ['review', 'review'],
   ['report', 'report'],
-  ['suggest', 'suggestions'],
+  ['suggest', 'suggest'],
+  ['draft', 'suggest'],
 ]
 
 export default function App() {
@@ -95,6 +97,7 @@ export default function App() {
           {tab === 'review' && user.is_manager && <ReviewPage lang={lang} />}
           {tab === 'report' && user.is_manager && <ReportPage lang={lang} />}
           {tab === 'suggest' && user.is_manager && <SuggestPage lang={lang} />}
+          {tab === 'draft' && user.is_manager && <DraftPage lang={lang} />}
           {tab === 'profile' && <ProfilePage user={user} lang={lang} onLang={changeLang} onLogout={logout} onBack={() => setTab(user.is_manager ? 'schedule' : 'today')} />}
         </main>
         <nav className="bottom-nav">

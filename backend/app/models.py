@@ -67,6 +67,22 @@ class SideworkRecord(Base):
     reviewed_by = Column(Integer, nullable=True)
 
 
+class AIDraft(Base):
+    """AI 起草的排班草稿：只存草稿，批准后才生成 Schedule 草稿（仍需发布）。
+
+    payload 是 JSON 文本：{"entries": [{employee_id, shift_template_id, date, reason}], "warnings": [...]}
+    驳回后不生成任何排班；AI 永不直接发布排班。
+    """
+    __tablename__ = "ai_drafts"
+    id = Column(Integer, primary_key=True)
+    week_start = Column(Date, nullable=False)
+    requirement_text = Column(Text, nullable=False, default="")
+    status = Column(String(20), default="draft")  # draft / approved / rejected
+    payload = Column(Text, default="{}")
+    created_by = Column(Integer, nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
+
+
 class DailyReport(Base):
     __tablename__ = "daily_reports"
     id = Column(Integer, primary_key=True)

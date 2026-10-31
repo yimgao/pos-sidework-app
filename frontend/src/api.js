@@ -36,6 +36,15 @@ export const scheduleWeek = (weekStart) => api('/api/schedule?week_start=' + wee
 export const shiftTemplates = () => api('/api/schedule/templates')
 export const createSchedule = (body) => api('/api/schedule', { method: 'POST', body })
 export const publishSchedule = (weekStart) => api('/api/schedule/publish?week_start=' + weekStart, { method: 'POST' })
+export const rollingMe = (day) => api('/api/scores/rolling/me' + (day ? '?day=' + day : ''))
+export const rollingAll = (day) => api('/api/scores/rolling/all' + (day ? '?day=' + day : ''))
+export const createDraft = (body) => api('/api/ai/drafts', { method: 'POST', body })
+export const listDrafts = () => api('/api/ai/drafts')
+export const approveDraft = (id) => api('/api/ai/drafts/' + id + '/approve', { method: 'POST' })
+export const rejectDraft = (id) => api('/api/ai/drafts/' + id + '/reject', { method: 'POST' })
+export const removeDraftEntry = (id, index) => api('/api/ai/drafts/' + id + '/remove-entry', { method: 'POST', body: { index } })
+export const screenPhoto = (id, lang) => api('/api/ai/screen/' + id + (lang ? '?lang=' + lang : ''), { method: 'POST' })
+export const emailReport = (lang) => api('/api/ai/report-email' + (lang ? '?lang=' + lang : ''), { method: 'POST' })
 
 export function mondayOf(d = new Date()) {
   const x = new Date(d)

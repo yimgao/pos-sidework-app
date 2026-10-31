@@ -31,6 +31,35 @@ def score_for_day(db: Session, employee_id: int, day) -> dict:
     }
 
 
+def rolling_score_14(db: Session, employee_id: int, end_day) -> dict:
+    """14-day rolling score: mean of daily scores on days with any record.
+
+    Days with no record at all are excluded (a day off is not a zero), so a
+    new employee is never dragged down by days they were not scheduled.
+    Returns no_record=True when the window has no records at all.
+    """
+    import datetime
+
+    days = []
+    for i in range(13, -1, -1):
+        day = end_day - datetime.timedelta(days=i)
+        s = score_for_day(db, employee_id, day)
+        if s["done"] > 0 or s["reviewed"] > 0:
+            days.append(s)
+    if not days:
+        return {"rolling_score": None, "days_with_records": 0, "no_record": True,
+                "done": 0, "total": 0, "completion": None, "quality": None, "ontime": None}
+    n = len(days)
+    return {
+        "rolling_score": round(sum(d["score"] for d in days) / n, 1),
+        "days_with_records": n, "no_record": False,
+        "done": sum(d["done"] for d in days), "total": sum(d["total"] for d in days),
+        "completion": round(sum(d["completion"] for d in days) / n, 1),
+        "quality": round(sum(d["quality"] for d in days) / n, 1),
+        "ontime": round(sum(d["ontime"] for d in days) / n, 1),
+    }
+
+
 def _pick_title(title: str, lang: str) -> str:
     parts = str(title).split(" || ")
     if len(parts) == 2:

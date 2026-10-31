@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
-import { markLate, pendingReview, reviewRecord } from '../api'
+import { markLate, pendingReview, reviewRecord, screenPhoto } from '../api'
 import { dict, displayText } from '../i18n'
 
 export default function ReviewPage({ lang }) {
   const L = dict(lang).review
   const [rows, setRows] = useState([])
   const [notes, setNotes] = useState({})
+  const [screens, setScreens] = useState({})
   const [msg, setMsg] = useState('')
   const load = () => pendingReview().then(setRows).catch((e) => setMsg(e.message))
   useEffect(() => { load() }, [])
@@ -21,6 +22,10 @@ export default function ReviewPage({ lang }) {
           {r.file_name && <p className="muted">{L.file}：{r.file_name}</p>}
           <p className="muted">{L.note}：{r.note || L.none}</p>
           <input placeholder={L.rejectPlaceholder} value={notes[r.id] || ''} onChange={(e) => setNotes({ ...notes, [r.id]: e.target.value })} />
+          {r.photo_url && <div>
+            <button className="btn2" onClick={async () => { setScreens({ ...screens, [r.id]: L.screening }); try { const s = await screenPhoto(r.id, lang); setScreens({ ...screens, [r.id]: `${s.status} · ${s.reason}${s.model ? ' (' + s.model + ')' : ''}` }) } catch (e) { setScreens({ ...screens, [r.id]: e.message }) } }}>{L.screen}</button>
+            {screens[r.id] && <p className="muted">{screens[r.id]}</p>}
+          </div>}
           <div>
             <button className="btn green" onClick={async () => { await reviewRecord(r.id, { result: 'pass', note: notes[r.id] || '' }); load() }}>{L.approve}</button>
             <button className="btn red" onClick={async () => { try { await reviewRecord(r.id, { result: 'fail', note: notes[r.id] || '' }); load() } catch (e) { setMsg(e.message) } }}>{L.reject}</button>
