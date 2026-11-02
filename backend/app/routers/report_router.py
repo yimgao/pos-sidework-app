@@ -55,4 +55,4 @@ def generate_report(date: datetime.date | None = None, lang: str = "en", db: Ses
     else:
         db.add(DailyReport(date=day, summary_text=data["summary_text"]))
     db.commit()
-    return {"date": str(day), "summary_text": data["summary_text"]}
+    return {"date": str(day), "summary_text": data["summary_text"], "employees": data["employees"]}

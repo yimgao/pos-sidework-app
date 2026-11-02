@@ -166,5 +166,7 @@ def suggestion(day: datetime.date, lang: str = "en", db: Session = Depends(get_d
     out = []
     for emp in db.query(Employee).filter(Employee.is_manager == False, Employee.is_active == True).all():  # noqa: E712
         s = score_for_day(db, emp.id, day)
+        if s.get("not_assigned"):
+            continue  # 当天没被分配 sidework 的员工不进建议表，不误判
         out.append({"employee_id": emp.id, "name": emp.name, **s, **suggestion_for_score(s["score"], done=s["done"], reviewed=s["reviewed"], lang=lang)})
     return out

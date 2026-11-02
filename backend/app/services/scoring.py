@@ -4,16 +4,37 @@
 """
 from sqlalchemy.orm import Session
 
-from ..models import SideworkRecord, SideworkTemplate
+from ..models import SideworkAssignment, SideworkRecord, SideworkTemplate
 
 
 def score_for_day(db: Session, employee_id: int, day) -> dict:
-    templates = db.query(SideworkTemplate).filter(SideworkTemplate.is_active == True).all()  # noqa: E712
+    """当日分数。分母规则（2026-11-01 用户拍板修）：
+    - 当天没有任何分配：分母 = 全部在用清单（老行为）。
+    - 当天有人被分配：分母 = 只算分给该员工的项；当天没被分配的员工
+      不计分（score=None、not_assigned=True），绝不按 0 分或按全清单算。
+    """
+    all_active = db.query(SideworkTemplate).filter(SideworkTemplate.is_active == True).all()  # noqa: E712
+    any_assignments = db.query(SideworkAssignment).filter(SideworkAssignment.date == day).first() is not None
+    if any_assignments:
+        assigned_ids = {a.template_id for a in db.query(SideworkAssignment).filter(
+            SideworkAssignment.employee_id == employee_id, SideworkAssignment.date == day).all()}
+        if not assigned_ids:
+            return {
+                "total": 0, "done": 0, "completion": None, "quality": None, "ontime": None,
+                "score": None, "late": 0, "reviewed": 0, "passed": 0, "missed": [],
+                "failed": [], "late_items": [], "pending_review": 0, "provisional": False,
+                "assigned_mode": True, "not_assigned": True,
+            }
+        templates = [t for t in all_active if t.id in assigned_ids]
+    else:
+        templates = all_active
     total = len(templates)
-    records = db.query(SideworkRecord).filter(
+    tpl_ids = {t.id for t in templates}
+    records = [r for r in db.query(SideworkRecord).filter(
         SideworkRecord.employee_id == employee_id, SideworkRecord.date == day
-    ).all()
+    ).all() if r.template_id in tpl_ids]
     by_template = {r.template_id: r for r in records}
+    title_by_id = {t.id: t.title for t in templates}
     done = sum(1 for r in records if r.status == "done")
     reviewed = [r for r in records if r.review]
     passed = sum(1 for r in reviewed if r.review == "pass")
@@ -22,12 +43,18 @@ def score_for_day(db: Session, employee_id: int, day) -> dict:
     quality = (passed / len(reviewed) * 100) if reviewed else 100
     ontime = ((total - late) / total * 100) if total else 100
     score = completion * 0.4 + quality * 0.4 + ontime * 0.2
-    missed = [t.title for t in templates if by_template.get(t.id) is None]
+    missed = [t.title for t in templates if by_template.get(t.id) is None or by_template[t.id].status != "done"]
+    failed = [title_by_id[r.template_id] for r in records if r.review == "fail"]
+    late_items = [title_by_id[r.template_id] for r in records if r.late]
+    pending_review = sum(1 for r in records if r.status == "done" and not r.review)
     return {
         "total": total, "done": done, "completion": round(completion, 1),
         "quality": round(quality, 1), "ontime": round(ontime, 1),
         "score": round(score, 1), "late": late,
         "reviewed": len(reviewed), "passed": passed, "missed": missed,
+        "failed": failed, "late_items": late_items, "pending_review": pending_review,
+        "provisional": pending_review > 0,
+        "assigned_mode": any_assignments, "not_assigned": False,
     }
 
 
@@ -67,8 +94,10 @@ def _pick_title(title: str, lang: str) -> str:
     return title
 
 
-def suggestion_for_score(score: float, done: int = 0, reviewed: int = 0, lang: str = "en") -> dict:
+def suggestion_for_score(score: float | None, done: int = 0, reviewed: int = 0, lang: str = "en") -> dict:
     zh = lang == "zh"
+    if score is None:
+        return {"suggestion": "keep", "label": "今日未分配，不计分" if zh else "Not assigned today, not scored"}
     if done == 0 and reviewed == 0:
         return {"suggestion": "keep", "label": "暂无记录，正常排班" if zh else "No record yet, keep schedule"}
     if score < 70:

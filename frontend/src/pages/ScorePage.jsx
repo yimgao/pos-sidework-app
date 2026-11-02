@@ -16,7 +16,8 @@ export default function ScorePage({ user, lang }) {
     return (
       <div className="card">
         <h2>{L.myTitle}：{user.name}</h2>
-        <p>{L.todayScore}：<b>{data.score}</b> ({L.completion} {data.completion}% ×40% + {L.approval} {data.quality}% ×40% + {L.ontime} {data.ontime}% ×20%)</p>
+        {data.not_assigned ? <p>{L.todayScore}：<b>{lang === 'zh' ? '今日未分配，不计分' : 'Not assigned today, not scored'}</b></p> :
+        <p>{L.todayScore}：<b>{data.score}</b> ({L.completion} {data.completion}% ×40% + {L.approval} {data.quality}% ×40% + {L.ontime} {data.ontime}% ×20%)</p>}
         <p>{L.completed} {data.done} / {data.total} {L.items} · {L.reviewed} {data.reviewed} {L.items} · {L.passed} {data.passed} {L.items} · {L.late} {data.late} {L.items}</p>
         {rolling && <p>{L.rollingTitle}：<b>{rolling.no_record ? L.noRecord : rolling.rolling_score}</b>{!rolling.no_record && ` (${rolling.days_with_records} ${L.daysWithRecords})`}</p>}
         <p className="muted">{L.rollingNote}</p>
@@ -29,7 +30,7 @@ export default function ScorePage({ user, lang }) {
     <div className="card">
       <h2>{L.allTitle}</h2>
       <table><thead><tr><th>{L.employee}</th><th>{L.todayScore}</th><th>{L.rollingTitle}</th><th>{L.completed}</th><th>{L.passed}</th><th>{L.late}</th></tr></thead>
-        <tbody>{data.map((s) => <tr key={s.employee_id}><td>{s.name}</td><td>{s.score}</td><td>{rollById[s.employee_id]?.no_record ? L.noRecord : (rollById[s.employee_id]?.rolling_score ?? '—')}</td><td>{s.done}/{s.total}</td><td>{s.passed}/{s.reviewed}</td><td>{s.late}</td></tr>)}</tbody>
+        <tbody>{data.map((s) => <tr key={s.employee_id}><td>{s.name}</td><td>{s.not_assigned ? (lang === 'zh' ? '未分配' : 'Not assigned') : s.score}</td><td>{rollById[s.employee_id]?.no_record ? L.noRecord : (rollById[s.employee_id]?.rolling_score ?? '—')}</td><td>{s.done}/{s.total}</td><td>{s.passed}/{s.reviewed}</td><td>{s.late}</td></tr>)}</tbody>
       </table>
     </div>
   )
