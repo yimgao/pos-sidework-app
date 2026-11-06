@@ -13,18 +13,18 @@ app/
       models.py            # 员工、班次、排班、清单、完成记录、日报
       auth.py              # PIN 哈希、Token 会话
       seed.py              # 种子数据（经理 123456，员工 1111/2222/3333）
-      database.py          # SQLite 连接（以后换 PostgreSQL 改这里）
-      routers/             # auth / employees / schedule / sidework / review / report
+      database.py          # SQLite 连接（DATABASE_URL 设了就用 PostgreSQL）
+      routers/             # auth / employees / schedule / sidework / review / report / ai
       services/
-        scoring.py         # 完成率 40% + 复核通过率 40% + 准时率 20%
-        daily_report.py    # 每日报告规则版文字
+        scoring.py         # 完成率 40% + 复核通过率 40% + 准时率 20%，14 天滚动分
+        daily_report.py    # 每日报告 v2：分数 → 原因 → 建议 → 给员工的话
     uploads/               # 照片/视频（按日期分文件夹，数据库只存路径）
     requirements.txt
   frontend/                # Vite + React
     src/
       api.js               # 所有后端调用集中在这里
-      App.jsx              # 登录 + 顶部导航
-      pages/               # Schedule / Today / Review / Score / Report / Suggest
+      App.jsx              # 登录 + 左侧竖导航（电脑端）/ 底部 Tab（手机端）
+      pages/               # Schedule / Today / Review / Score / Report / Suggest / Draft / Tasks / Profile
 ```
 
 ## 运行（两个终端）
@@ -52,9 +52,16 @@ npm run dev
 3. Anna 再登录 → 分数 → 分数已更新。
 4. 经理 → 每日报告 → 看到当日总结；→ 下周排班建议 → 看到 keep / 减半天 / 减一天建议。
 
+## Spec-Driven 开发（六份上下文文档）
+
+新会话开工前先读仓库根目录的六份文档：`project-overview.md`、
+`architecture.md`、`code-standards.md`、`ai-workflow.md`、`ui-context.md`、
+`progress.md`，以及 `AGENTS.md`。每个新功能先写 `specs/` 里的 spec，
+再写代码。当前状态以 `progress.md` 为准。
+
 ## 还没做的事（下一步，不是架构缺口）
 
 - 邮件发每日报告给经理：需配 SMTP，报告接口已留好（`POST /api/reports/daily/generate`）。
-- AI 视觉判照片：报告服务里 `daily_report.py` 是规则版，视觉版只标存疑、经理终审。
-- 两周滚动分：当前分数接口用当日分，滚动平均在 `scoring.py` 里加一个 14 天聚合即可。
-- 排班编辑 UI：排班表已能看、接口已能建班次和发布，拖拽/点选编辑是前端下一小步。
+- AI 视觉判照片：没配 key 只做文件检查、结论永远待人工；配 key 走 OpenAI 兼容接口，视觉版只标存疑、经理终审。
+- 排班建议目前用单日分，14 天滚动分已算好、尚未接进建议。
+- 排班表已支持点格子直接改（换班次、×取消、空格子新增）；拖拽排班还没做。
