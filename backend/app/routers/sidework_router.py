@@ -12,6 +12,8 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from ..auth import get_current_user, require_manager
+from ..photo_url import photo_url
+from ..services.blob_upload import upload_to_blob
 from ..database import get_db
 from ..models import Employee, Schedule, SideworkAssignment, SideworkRecord, SideworkTemplate
 
@@ -121,7 +123,7 @@ def my_today(db: Session = Depends(get_db), user: Employee = Depends(get_current
         out.append({"template_id": t.id, "category": t.category, "title": t.title, "requires_photo": t.requires_photo,
                     "group_letter": t.group_letter or "A",
                     "record_id": r.id if r else None, "status": r.status if r else "pending",
-                    "note": r.note if r else "", "photo_url": ("/uploads/" + r.photo_path) if r and r.photo_path else "",
+                    "note": r.note if r else "", "photo_url": photo_url(r.photo_path) if r and r.photo_path else "",
                     "file_name": r.file_name if r else "", "review": r.review if r else "",
                     "review_note": r.review_note if r else "", "late": bool(r.late) if r else False})
     return {"date": str(today), "items": out, "assigned_mode": any_assigned}
@@ -146,16 +148,19 @@ async def complete(template_id: int = Form(...), note: str = Form(""),
         ext = os.path.splitext(file.filename or "")[1].lower()
         if ext not in ALLOWED_EXT:
             raise HTTPException(status_code=400, detail="只支持 jpg/png/mp4/webm/mov")
-        folder = os.path.join(BASE_DIR, "uploads", str(today))
-        os.makedirs(folder, exist_ok=True)
         name = f"{user.id}_{template_id}_{secrets.token_hex(8)}{ext}"
-        dest = os.path.join(folder, name)
         data = await file.read()
         if len(data) > 50 * 1024 * 1024:
             raise HTTPException(status_code=400, detail="文件超过 50MB")
-        with open(dest, "wb") as f:
-            f.write(data)
-        photo_path = f"{today}/{name}"
+        blob_url = upload_to_blob(data, name, file.content_type or "")
+        if blob_url:
+            photo_path = blob_url
+        else:
+            folder = os.path.join(BASE_DIR, "uploads", str(today))
+            os.makedirs(folder, exist_ok=True)
+            with open(os.path.join(folder, name), "wb") as f:
+                f.write(data)
+            photo_path = f"{today}/{name}"
         rec.file_name = file.filename
     if tpl.requires_photo and not photo_path and not rec.photo_path:
         raise HTTPException(status_code=400, detail="这项是必传项，请先传照片或视频")

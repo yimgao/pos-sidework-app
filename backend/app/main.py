@@ -12,7 +12,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.makedirs(os.path.join(BASE_DIR, "uploads"), exist_ok=True)
 
 app = FastAPI(title="排班 + Sidework")
-app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+_origins = [o.strip() for o in os.environ.get("ALLOWED_ORIGINS", "").split(",") if o.strip()]
+_origins += ["http://localhost:5173", "http://127.0.0.1:5173"]
+app.add_middleware(CORSMiddleware, allow_origins=list(dict.fromkeys(_origins)),
                    allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 app.mount("/uploads", StaticFiles(directory=os.path.join(BASE_DIR, "uploads")), name="uploads")
 

@@ -1,4 +1,5 @@
 // 所有后端调用集中在这里，前端页面不直接拼 URL。
+const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '')
 export function getToken() { return localStorage.getItem('pos-token') || '' }
 export function setToken(t) { localStorage.setItem('pos-token', t) }
 export function clearToken() { localStorage.removeItem('pos-token') }
@@ -8,7 +9,7 @@ export async function api(path, { method = 'GET', body, form } = {}) {
   if (!form) headers['Content-Type'] = 'application/json'
   const token = getToken()
   if (token) headers['Authorization'] = 'Bearer ' + token
-  const res = await fetch(path, {
+  const res = await fetch(API_BASE + path, {
     method,
     headers,
     body: form ? body : body ? JSON.stringify(body) : undefined,

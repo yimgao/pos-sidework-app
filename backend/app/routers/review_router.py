@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from ..auth import require_manager
+from ..photo_url import photo_url
 from ..database import get_db
 from ..models import Employee, SideworkRecord, SideworkTemplate
 
@@ -23,7 +24,7 @@ def pending(db: Session = Depends(get_db), manager: Employee = Depends(require_m
         emp = db.query(Employee).filter(Employee.id == r.employee_id).first()
         out.append({"id": r.id, "employee_name": emp.name if emp else "", "title": tpl.title if tpl else "",
                     "date": str(r.date), "note": r.note, "file_name": r.file_name,
-                    "photo_url": ("/uploads/" + r.photo_path) if r.photo_path else "", "late": r.late})
+                    "photo_url": (photo_url(r.photo_path)) if r.photo_path else "", "late": r.late})
     return out
 
 

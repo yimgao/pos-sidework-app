@@ -24,6 +24,10 @@
   OAuth / payments / SMS configs exist; only the core is actually built
   (see Blocked).
 
+## Online hosting (2026-11-18, user asked to host online for manager + staff)
+- Prep: JWT login (stateless, replaces in-memory tokens), CORS from ALLOWED_ORIGINS, frontend API base from VITE_API_URL, photo uploads to Vercel Blob when BLOB_READ_WRITE_TOKEN is set (local disk fallback), photo URLs absolute when API_PUBLIC_URL is set, Vercel serverless entry backend/api/index.py + backend/vercel.json.
+- Still needed: hosted Postgres DATABASE_URL, Blob store + token, JWT_SECRET, two Vercel projects (frontend root=frontend, backend root=backend).
+
 ## Next (approved in principle, not yet built)
 
 From the 2026-10-31 audit, the user has **not** approved these yet, except

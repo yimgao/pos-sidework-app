@@ -1,15 +1,19 @@
-"""PIN 登录：PIN 只存哈希，不存明文。Token 为服务端内存会话（单机演示/单店够用）。"""
+"""PIN 登录：PIN 只存哈希，不存明文。Token 为 JWT（无状态），
+线上多实例 / serverless 下也能用；本地单机同样可用。"""
+import datetime
 import hashlib
 import hmac
-import secrets
+import os
 
+import jwt
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from .database import get_db
 from .models import Employee
 
-TOKENS: dict[str, int] = {}
+JWT_SECRET = os.environ.get("JWT_SECRET") or "pos-sidework-dev-only-change-me"
+JWT_ALG = "HS256"
 
 
 def hash_pin(pin: str) -> str:
@@ -22,18 +26,19 @@ def verify_pin(pin: str, pin_hash: str) -> bool:
 
 
 def create_token(employee_id: int) -> str:
-    token = secrets.token_hex(24)
-    TOKENS[token] = employee_id
-    return token
+    now = datetime.datetime.now(datetime.timezone.utc)
+    return jwt.encode({"sub": str(employee_id), "iat": now,
+                       "exp": now + datetime.timedelta(days=30)}, JWT_SECRET, algorithm=JWT_ALG)
 
 
 def get_current_user(request: Request, db: Session = Depends(get_db)) -> Employee:
     auth = request.headers.get("Authorization", "")
     if not auth.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="未登录")
-    token = auth[7:]
-    employee_id = TOKENS.get(token)
-    if not employee_id:
+    try:
+        payload = jwt.decode(auth[7:], JWT_SECRET, algorithms=[JWT_ALG])
+        employee_id = int(payload["sub"])
+    except Exception:
         raise HTTPException(status_code=401, detail="登录已失效")
     user = db.query(Employee).filter(Employee.id == employee_id, Employee.is_active == True).first()  # noqa: E712
     if not user:

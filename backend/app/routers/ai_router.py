@@ -101,7 +101,17 @@ def screen(record_id: int, lang: str = "en", db: Session = Depends(get_db), mana
     if not rec:
         raise HTTPException(status_code=404, detail="记录不存在")
     tpl = db.query(SideworkTemplate).filter(SideworkTemplate.id == rec.template_id).first()
-    full = os.path.join(BASE_DIR, "uploads", rec.photo_path) if rec.photo_path else ""
+    if rec.photo_path and rec.photo_path.startswith("http"):
+        import tempfile
+        import urllib.request
+        tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".jpg")
+        try:
+            urllib.request.urlretrieve(rec.photo_path, tmp.name)
+            full = tmp.name
+        except Exception:
+            full = ""
+    else:
+        full = os.path.join(BASE_DIR, "uploads", rec.photo_path) if rec.photo_path else ""
     return {"record_id": rec.id, **screen_photo(full, tpl.title if tpl else "", lang=lang)}
 
 
