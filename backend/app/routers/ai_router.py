@@ -16,6 +16,7 @@ from ..database import get_db
 from ..models import AIDraft, Employee, Schedule, SideworkRecord, SideworkTemplate
 from ..services.ai_vision import screen_photo
 from ..services.daily_report import build_daily_report
+from ..services.person_report import build_person_report
 from ..services.draft_schedule import parse_requirement
 from ..services.email_report import send_daily_report
 
@@ -113,6 +114,15 @@ def screen(record_id: int, lang: str = "en", db: Session = Depends(get_db), mana
     else:
         full = os.path.join(BASE_DIR, "uploads", rec.photo_path) if rec.photo_path else ""
     return {"record_id": rec.id, **screen_photo(full, tpl.title if tpl else "", lang=lang)}
+
+
+@router.get("/person-report/{employee_id}")
+def person_report(employee_id: int, date: datetime.date | None = None, lang: str = "en",
+                  db: Session = Depends(get_db), manager: Employee = Depends(require_manager)):
+    from ..routers.settings_router import get_setting
+    if not manager.is_owner and get_setting(db, "manager_can_see_person_reports") != "true":
+        raise HTTPException(status_code=403, detail="Owner 已关闭经理查看个人报告")
+    return build_person_report(db, employee_id, date or datetime.date.today(), lang=lang)
 
 
 @router.post("/report-email")

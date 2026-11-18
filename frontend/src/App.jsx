@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { clearToken, login, me, setToken } from './api'
+import { clearToken, login, loginUser, me, setToken } from './api'
 import { dict, getLang, setLang } from './i18n'
 import SchedulePage from './pages/SchedulePage'
 import TodayPage from './pages/TodayPage'
@@ -9,6 +9,8 @@ import ReportPage from './pages/ReportPage'
 import SuggestPage from './pages/SuggestPage'
 import DraftPage from './pages/DraftPage'
 import TasksPage from './pages/TasksPage'
+import DashboardPage from './pages/DashboardPage'
+import AccountsPage from './pages/AccountsPage'
 import ProfilePage from './pages/ProfilePage'
 
 function Icon({ name }) {
@@ -30,16 +32,21 @@ const COMMON = [
   ['score', 'score'],
 ]
 const MANAGER = [
+  ['dashboard', 'score'],
   ['review', 'review'],
   ['report', 'report'],
   ['suggest', 'suggest'],
   ['draft', 'suggest'],
   ['tasks', 'today'],
+  ['accounts', 'today'],
 ]
 
 export default function App() {
   const [user, setUser] = useState(null)
   const [pin, setPin] = useState('')
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [usePin, setUsePin] = useState(false)
   const [msg, setMsg] = useState('')
   const [tab, setTab] = useState('schedule')
   const [lang, setLangState] = useState(getLang())
@@ -53,11 +60,17 @@ export default function App() {
           <div className="login-mark"><Icon name="schedule" /></div>
           <h1>{L.login.title}</h1>
           <p className="muted">{L.appSub}</p>
-          <input inputMode="numeric" placeholder={L.login.enterPin} value={pin} onChange={(e) => setPin(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') document.getElementById('login-btn').click() }} />
+          {usePin ? (
+            <input inputMode="numeric" placeholder={L.login.enterPin} value={pin} onChange={(e) => setPin(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') document.getElementById('login-btn').click() }} />
+          ) : (<>
+            <input placeholder={L.login.username} value={username} onChange={(e) => setUsername(e.target.value)} />
+            <input placeholder={L.login.password} type="password" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') document.getElementById('login-btn').click() }} />
+          </>)}
           <button id="login-btn" className="btn login-btn" onClick={async () => {
-            try { const d = await login(pin); setToken(d.token); setUser(d.user); setTab(d.user.is_manager ? 'schedule' : 'today') }
-            catch (e) { setMsg(lang === 'zh' ? 'PIN 不对' : 'Wrong PIN') }
+            try { const d = usePin ? await login(pin) : await loginUser(username, password); setToken(d.token); setUser(d.user); setTab(d.user.is_manager ? 'dashboard' : 'today') }
+            catch (e) { setMsg(L.login.wrongPin) }
           }}>{L.login.enter}</button>
+          <p className="muted"><button className="btn2" onClick={() => setUsePin(!usePin)}>{usePin ? L.login.useAccount : L.login.usePin}</button></p>
           <p className="muted">{L.login.demo}</p>
           <p className="muted error">{msg}</p>
         </div>
@@ -87,7 +100,7 @@ export default function App() {
         </nav></>)}
         <button className="user-card" onClick={() => setTab('profile')}>
           <div className="avatar">{user.name.slice(0, 1)}</div>
-          <div className="user-meta"><b>{user.name}</b><small>{user.is_manager ? L.manager : L.staff} · {L.profile.title} ›</small></div>
+          <div className="user-meta"><b>{user.name}</b><small>{user.is_owner ? L.owner : user.is_manager ? L.manager : L.staff} · {L.profile.title} ›</small></div>
         </button>
       </aside>
       <div className="maincol">
@@ -101,6 +114,8 @@ export default function App() {
           {tab === 'suggest' && user.is_manager && <SuggestPage lang={lang} />}
           {tab === 'draft' && user.is_manager && <DraftPage lang={lang} />}
           {tab === 'tasks' && user.is_manager && <TasksPage lang={lang} />}
+          {tab === 'dashboard' && user.is_manager && <DashboardPage user={user} lang={lang} />}
+          {tab === 'accounts' && user.is_manager && <AccountsPage user={user} lang={lang} />}
           {tab === 'profile' && <ProfilePage user={user} lang={lang} onLang={changeLang} onLogout={logout} onBack={() => setTab(user.is_manager ? 'schedule' : 'today')} />}
         </main>
         <nav className="bottom-nav">

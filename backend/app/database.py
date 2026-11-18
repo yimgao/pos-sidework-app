@@ -20,17 +20,22 @@ def ensure_new_columns():
     """轻量迁移：老数据库没有新字段时补列，不删数据、不重建表。"""
     from sqlalchemy import inspect, text
 
-    try:
-        cols = {c["name"] for c in inspect(engine).get_columns("sidework_templates")}
-    except Exception:
-        return
-    if not cols:
-        return
-    with engine.begin() as conn:
-        if "group_letter" not in cols:
-            conn.execute(text("ALTER TABLE sidework_templates ADD COLUMN group_letter VARCHAR(10) DEFAULT 'A'"))
-        if "is_active" not in cols:
-            conn.execute(text("ALTER TABLE sidework_templates ADD COLUMN is_active BOOLEAN DEFAULT 1"))
+    def _add(table, col, ddl):
+        try:
+            cols = {c["name"] for c in inspect(engine).get_columns(table)}
+        except Exception:
+            return
+        if cols and col not in cols:
+            with engine.begin() as conn:
+                conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {ddl}"))
+    _add("sidework_templates", "group_letter", "group_letter VARCHAR(10) DEFAULT 'A'")
+    _add("sidework_templates", "is_active", "is_active BOOLEAN DEFAULT 1")
+    _add("sidework_templates", "standard", "standard TEXT DEFAULT ''")
+    _add("sidework_templates", "segment", "segment VARCHAR(20) DEFAULT 'opening'")
+    _add("sidework_templates", "optional", "optional BOOLEAN DEFAULT 0")
+    _add("employees", "username", "username VARCHAR(100)")
+    _add("employees", "password_hash", "password_hash VARCHAR(200)")
+    _add("employees", "is_owner", "is_owner BOOLEAN DEFAULT 0")
 
 
 def get_db():

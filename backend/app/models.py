@@ -16,9 +16,26 @@ class Employee(Base):
     name = Column(String(100), nullable=False)
     role = Column(String(50), nullable=False, default="server")
     pin_hash = Column(String(200), nullable=False)
+    username = Column(String(100), nullable=True, unique=True)
+    password_hash = Column(String(200), nullable=True)
+    is_owner = Column(Boolean, default=False)
     is_manager = Column(Boolean, default=False)
     hourly_rate = Column(Float, nullable=True)
     is_active = Column(Boolean, default=True)
+
+
+class Role(Base):
+    """可配置岗位：经理/owner 在应用里加，员工挂一个岗位，任务可挂一个岗位。"""
+    __tablename__ = "roles"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False, unique=True)
+    is_active = Column(Boolean, default=True)
+
+
+class AppSetting(Base):
+    __tablename__ = "app_settings"
+    key = Column(String(100), primary_key=True)
+    value = Column(String(500), default="")
 
 
 class ShiftTemplate(Base):
@@ -50,6 +67,9 @@ class SideworkTemplate(Base):
     sort_order = Column(Integer, default=0)
     group_letter = Column(String(10), default="A")  # A / B / C / D，经理加任务时选组
     is_active = Column(Boolean, default=True)  # 经理“删” = 停用，不删历史记录
+    standard = Column(Text, default="")  # 这项该怎么做：员工做任务时看得到，经理/owner 在应用里填
+    segment = Column(String(20), default="opening")  # opening / midday / evening
+    optional = Column(Boolean, default=False)  # 中午段默认可选
 
 
 class SideworkAssignment(Base):

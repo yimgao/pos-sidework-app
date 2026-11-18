@@ -3,9 +3,9 @@ import datetime
 
 from sqlalchemy.orm import Session
 
-from .auth import hash_pin
+from .auth import hash_password, hash_pin
 from .database import Base, SessionLocal, engine, ensure_new_columns
-from .models import Employee, Schedule, ShiftTemplate, SideworkTemplate
+from .models import AppSetting, Employee, Role, Schedule, ShiftTemplate, SideworkTemplate
 
 TASKS = [
     ("opening", "all", "Set tables: cutlery, cups, napkins || 餐桌摆台：餐具、杯子、餐巾齐全", True, 1),
@@ -28,11 +28,19 @@ def seed():
     try:
         if db.query(Employee).count():
             return
-        manager = Employee(name="Manager", role="manager", pin_hash=hash_pin("123456"), is_manager=True)
-        anna = Employee(name="Anna", role="server", pin_hash=hash_pin("1111"))
-        ben = Employee(name="Ben", role="server", pin_hash=hash_pin("2222"))
-        chris = Employee(name="Chris", role="server", pin_hash=hash_pin("3333"))
-        db.add_all([manager, anna, ben, chris]); db.flush()
+        owner = Employee(name="Owner", role="owner", pin_hash=hash_pin("000000"), username="owner",
+                         password_hash=hash_password("owner123"), is_owner=True, is_manager=True)
+        manager = Employee(name="Manager", role="manager", pin_hash=hash_pin("123456"), username="manager",
+                           password_hash=hash_password("manager123"), is_manager=True)
+        anna = Employee(name="Anna", role="server", pin_hash=hash_pin("1111"), username="anna",
+                        password_hash=hash_password("anna123"))
+        ben = Employee(name="Ben", role="server", pin_hash=hash_pin("2222"), username="ben",
+                       password_hash=hash_password("ben123"))
+        chris = Employee(name="Chris", role="server", pin_hash=hash_pin("3333"), username="chris",
+                         password_hash=hash_password("chris123"))
+        db.add_all([owner, manager, anna, ben, chris]); db.flush()
+        db.add_all([Role(name="Server"), Role(name="Cook"), Role(name="Manager"), Role(name="Host")])
+        db.add(AppSetting(key="manager_can_see_person_reports", value="true"))
         # 班次只叫名字，不带时间：Lunch shift / Dinner shift / Morning shift 等，
         # 自定义时间另外由经理在排班页选，不混在名字里。
         lunch = ShiftTemplate(name="Lunch shift || 午市", start_time="11:00", end_time="15:00", role="server")
@@ -44,9 +52,12 @@ def seed():
         db.add_all([lunch, dinner, closing, morning, evening, fullday]); db.flush()
         # 演示分组：开店=A、进行中=B、打烊=C，D 组留给经理自己加真实清单。
         group_map = {"opening": "A", "running": "B", "closing": "C"}
+        seg_map = {"opening": "opening", "running": "midday", "closing": "evening"}
         for cat, role, title, photo, order in TASKS:
             db.add(SideworkTemplate(category=cat, role=role, title=title, requires_photo=photo, sort_order=order,
-                                    group_letter=group_map.get(cat, "A")))
+                                    group_letter=group_map.get(cat, "A"),
+                                    segment=seg_map.get(cat, "opening"),
+                                    optional=(cat == "running")))
         today = datetime.date.today()
         monday = today - datetime.timedelta(days=today.weekday())
         plan = [(anna.id, 0, dinner.id), (anna.id, 2, dinner.id), (anna.id, 4, dinner.id), (anna.id, 5, dinner.id),

@@ -63,3 +63,16 @@ export function mondayOf(d = new Date()) {
   return x.toISOString().slice(0, 10)
 }
 export function todayStr() { return new Date().toISOString().slice(0, 10) }
+
+export const loginUser = (username, password) => api('/api/auth/login', { method: 'POST', body: { username, password } })
+export const listAccounts = () => api('/api/accounts')
+export const createAccount = (body) => api('/api/accounts', { method: 'POST', body })
+export const updateAccount = (id, body) => api('/api/accounts/' + id, { method: 'PATCH', body })
+export const listRoles = () => api('/api/roles')
+export const createRole = (body) => api('/api/roles', { method: 'POST', body })
+export const deleteRole = (id) => api('/api/roles/' + id, { method: 'DELETE' })
+export const getDashboard = (date, lang) => api('/api/dashboard' + (date ? '?date=' + date : '') + (lang ? (date ? '&' : '?') + 'lang=' + lang : ''))
+export const sendReport = (date, lang) => api('/api/dashboard/send-report' + (date ? '?date=' + date : '') + (lang ? (date ? '&' : '?') + 'lang=' + lang : ''), { method: 'POST' })
+export const personReport = (id, lang) => api('/api/ai/person-report/' + id + (lang ? '?lang=' + lang : ''))
+export const getSettings = () => api('/api/settings')
+export const setSetting = (body) => api('/api/settings', { method: 'POST', body })

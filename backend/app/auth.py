@@ -25,6 +25,17 @@ def verify_pin(pin: str, pin_hash: str) -> bool:
     return hmac.compare_digest(hash_pin(pin), pin_hash)
 
 
+def hash_password(password: str) -> str:
+    salt = b"pos-sidework-pw-v1"
+    return hashlib.pbkdf2_hmac("sha256", password.encode(), salt, 100_000).hex()
+
+
+def verify_password(password: str, password_hash: str | None) -> bool:
+    if not password_hash:
+        return False
+    return hmac.compare_digest(hash_password(password), password_hash)
+
+
 def create_token(employee_id: int) -> str:
     now = datetime.datetime.now(datetime.timezone.utc)
     return jwt.encode({"sub": str(employee_id), "iat": now,
@@ -47,6 +58,12 @@ def get_current_user(request: Request, db: Session = Depends(get_db)) -> Employe
 
 
 def require_manager(user: Employee = Depends(get_current_user)) -> Employee:
-    if not user.is_manager:
+    if not user.is_manager and not user.is_owner:
         raise HTTPException(status_code=403, detail="仅经理可用")
+    return user
+
+
+def require_owner(user: Employee = Depends(get_current_user)) -> Employee:
+    if not user.is_owner:
+        raise HTTPException(status_code=403, detail="仅 owner 可用")
     return user

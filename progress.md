@@ -24,6 +24,13 @@
   OAuth / payments / SMS configs exist; only the core is actually built
   (see Blocked).
 
+## Owner / Manager / Employee v2 (2026-11-18, spec specs/owner-manager-employee-v2.md)
+- Three user types (owner > manager > employee); username+password login (PIN fallback kept); owner creates any account, manager only employees; owner settings toggle for manager visibility of per-person AI reports.
+- Configurable roles (manager adds in app), tasks carry standard + segment (opening/midday/evening, midday optional) + role; Today groups by segment and shows the standard.
+- Owner/manager Dashboard: overview, per-person bars, by-segment rates, check-in timeline, leaderboard, watchlist, per-person AI reports, Send to manager (email+SMS, preview-only without SMTP/Twilio).
+- Verified 2026-11-18 by API test: owner/manager/employee logins, role creation, account permission boundaries, dashboard, toggle off/on, send-report preview.
+- Still blocked: hosted Postgres (Neon login pending), SMTP/Twilio accounts, real checklist standards (added in-app later by user).
+
 ## Online hosting (2026-11-18, user asked to host online for manager + staff)
 - Prep: JWT login (stateless, replaces in-memory tokens), CORS from ALLOWED_ORIGINS, frontend API base from VITE_API_URL, photo uploads to Vercel Blob when BLOB_READ_WRITE_TOKEN is set (local disk fallback), photo URLs absolute when API_PUBLIC_URL is set, Vercel serverless entry backend/api/index.py + backend/vercel.json.
 - Still needed: hosted Postgres DATABASE_URL, Blob store + token, JWT_SECRET, two Vercel projects (frontend root=frontend, backend root=backend).

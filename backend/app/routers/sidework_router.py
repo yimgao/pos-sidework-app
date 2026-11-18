@@ -25,7 +25,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 def _tpl_out(t: SideworkTemplate):
     return {"id": t.id, "category": t.category, "role": t.role, "title": t.title,
             "requires_photo": t.requires_photo, "group_letter": t.group_letter or "A",
-            "sort_order": t.sort_order, "is_active": bool(t.is_active)}
+            "sort_order": t.sort_order, "is_active": bool(t.is_active),
+            "standard": t.standard or "", "segment": t.segment or "opening",
+            "optional": bool(t.optional)}
 
 
 @router.get("/templates")
@@ -39,6 +41,10 @@ class TemplateIn(BaseModel):
     title_zh: str = ""
     group_letter: str = "A"
     requires_photo: bool = False
+    standard: str = ""
+    segment: str = "opening"
+    optional: bool = False
+    role: str = "all"
 
 
 @router.post("/templates")
@@ -48,9 +54,12 @@ def create_template(body: TemplateIn, db: Session = Depends(get_db), manager: Em
     title = body.title_en.strip()
     if body.title_zh.strip():
         title = f"{title} || {body.title_zh.strip()}"
+    if body.segment not in ("opening", "midday", "evening"):
+        raise HTTPException(status_code=400, detail="时段只能是 opening / midday / evening")
     max_order = db.query(SideworkTemplate).filter(SideworkTemplate.group_letter == body.group_letter).count()
-    t = SideworkTemplate(category="custom", role="all", title=title, requires_photo=body.requires_photo,
-                         sort_order=max_order + 1, group_letter=body.group_letter, is_active=True)
+    t = SideworkTemplate(category="custom", role=body.role or "all", title=title, requires_photo=body.requires_photo,
+                         sort_order=max_order + 1, group_letter=body.group_letter, is_active=True,
+                         standard=body.standard.strip(), segment=body.segment, optional=body.optional)
     db.add(t); db.commit(); db.refresh(t)
     return _tpl_out(t)
 
@@ -109,18 +118,22 @@ def my_today(db: Session = Depends(get_db), user: Employee = Depends(get_current
     today = datetime.date.today()
     templates = db.query(SideworkTemplate).filter(SideworkTemplate.is_active == True)  # noqa: E712
     templates = templates.order_by(SideworkTemplate.group_letter, SideworkTemplate.sort_order).all()
-    # 当天只要有人被分配，就按分配走；没人被分配时回落到全部清单。
+    # 当天只要有人被分配，就按分配走；没人被分配时回落到全部清单（只看自己岗位的）。
     any_assigned = db.query(SideworkAssignment).filter(SideworkAssignment.date == today).count() > 0
     if any_assigned:
         mine = {a.template_id for a in db.query(SideworkAssignment).filter(
             SideworkAssignment.employee_id == user.id, SideworkAssignment.date == today).all()}
         templates = [t for t in templates if t.id in mine]
+    else:
+        templates = [t for t in templates if (t.role or "all") in ("all", user.role)]
     records = {r.template_id: r for r in db.query(SideworkRecord).filter(
         SideworkRecord.employee_id == user.id, SideworkRecord.date == today).all()}
     out = []
     for t in templates:
         r = records.get(t.id)
         out.append({"template_id": t.id, "category": t.category, "title": t.title, "requires_photo": t.requires_photo,
+                    "standard": t.standard or "", "segment": t.segment or "opening",
+                    "optional": bool(t.optional), "role": t.role or "all",
                     "group_letter": t.group_letter or "A",
                     "record_id": r.id if r else None, "status": r.status if r else "pending",
                     "note": r.note if r else "", "photo_url": photo_url(r.photo_path) if r and r.photo_path else "",

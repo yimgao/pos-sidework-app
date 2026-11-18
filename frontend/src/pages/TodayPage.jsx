@@ -21,8 +21,8 @@ export default function TodayPage({ user, lang }) {
       <p className="muted">{L.photoNote} {msg}</p>
       {!data.items.length && <p className="muted">{data.assigned_mode ? L.assignedNote : ''}</p>}
       {data.items.map((it) => {
-        const grp = it.group_letter || 'A'
-        const head = grp !== cur ? (cur = grp, <h3 key={'h' + grp}>{L.group} {grp}</h3>) : null
+        const grp = it.segment || 'opening'
+        const head = grp !== cur ? (cur = grp, <h3 key={'h' + grp}>{L.segments[grp] || grp} {it.optional ? `(${L.optional})` : ''}</h3>) : null
         const status = it.status === 'done' && it.review === 'pass' ? <span className="tag ok">{L.approved}</span>
           : it.status === 'done' && it.review === 'fail' ? <span className="tag bad">{L.rejected}：{it.review_note}</span>
           : it.status === 'done' ? <span className="tag warn">{L.pendingReview}</span> : <span className="tag">{L.pending}</span>
@@ -30,7 +30,8 @@ export default function TodayPage({ user, lang }) {
           <div key={it.template_id}>
             {head}
             <div className="task">
-              <b>{displayText(it.title, lang)}</b> {it.requires_photo && <span className="tag">{L.photoRequired}</span>} {status}
+              <b>{displayText(it.title, lang)}</b> {it.requires_photo && <span className="tag">{L.photoRequired}</span>} {it.optional && <span className="tag">{L.optional}</span>} {status}
+              {it.standard && <p className="muted">{L.standard}：{it.standard}</p>}
               <div><input type="file" accept="image/*,video/*" onChange={(e) => setFiles({ ...files, [it.template_id]: e.target.files[0] })} /></div>
               {it.photo_url && <img className="thumb" src={it.photo_url} alt="" />}
               {it.file_name && <p className="muted">{L.uploadedFile}：{it.file_name}</p>}

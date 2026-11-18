@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { createTemplate, deleteTemplate, listAssignments, listEmployees, listTemplates, saveAssignments, scheduledStaff, todayStr } from '../api'
+import { createTemplate, deleteTemplate, listAssignments, listEmployees, listRoles, listTemplates, saveAssignments, scheduledStaff, todayStr } from '../api'
 import { dict, displayText } from '../i18n'
 
 const GROUPS = ['A', 'B', 'C', 'D', 'E']
@@ -16,6 +16,11 @@ export default function TasksPage({ lang }) {
   const [titleZh, setTitleZh] = useState('')
   const [group, setGroup] = useState('A')
   const [photo, setPhoto] = useState(false)
+  const [standard, setStandard] = useState('')
+  const [segment, setSegment] = useState('opening')
+  const [role, setRole] = useState('all')
+  const [optional, setOptional] = useState(false)
+  const [roles, setRoles] = useState([])
   // 每个分组可收起：key 是 list-A / assign-A，收起后只剩一行标题，页面不再那么长。
   const [collapsed, setCollapsed] = useState(new Set())
   const toggle = (key) => setCollapsed((prev) => { const next = new Set(prev); if (next.has(key)) next.delete(key); else next.add(key); return next })
@@ -28,7 +33,7 @@ export default function TasksPage({ lang }) {
     const all = await listAssignments(d).catch(() => [])
     setChecked(new Set(all.filter((a) => String(a.employee_id) === String(id)).map((a) => a.template_id)))
   }
-  useEffect(() => { loadTasks(); scheduledStaff(date).then((s) => { setStaff(s); if (s.length && !empId) setEmpId(String(s[0].id)) }).catch(() => {}) }, [])
+  useEffect(() => { loadTasks(); listRoles().then(setRoles).catch(() => {}); scheduledStaff(date).then((s) => { setStaff(s); if (s.length && !empId) setEmpId(String(s[0].id)) }).catch(() => {}) }, [])
   useEffect(() => { if (empId) loadAssign(date, empId) }, [date, empId])
 
   return (
@@ -45,9 +50,18 @@ export default function TasksPage({ lang }) {
       <input placeholder={L.titleEn} value={titleEn} onChange={(e) => setTitleEn(e.target.value)} />
       <input placeholder={L.titleZh} value={titleZh} onChange={(e) => setTitleZh(e.target.value)} />
       <label><input type="checkbox" checked={photo} onChange={(e) => setPhoto(e.target.checked)} /> {L.photoRequired}</label>
+      <select value={segment} onChange={(e) => { setSegment(e.target.value); setOptional(e.target.value === 'midday') }}>
+        <option value="opening">Opening</option><option value="midday">Midday</option><option value="evening">Evening</option>
+      </select>
+      <select value={role} onChange={(e) => setRole(e.target.value)}>
+        <option value="all">All roles</option>
+        {roles.map((r) => <option key={r.id} value={r.name}>{r.name}</option>)}
+      </select>
+      <label><input type="checkbox" checked={optional} onChange={(e) => setOptional(e.target.checked)} /> {L.optional}</label>
+      <input placeholder={L.standard} value={standard} onChange={(e) => setStandard(e.target.value)} />
       <button className="btn" onClick={async () => {
         if (!titleEn.trim()) { setMsg(''); return }
-        try { await createTemplate({ title_en: titleEn, title_zh: titleZh, group_letter: group, requires_photo: photo }); setTitleEn(''); setTitleZh(''); setPhoto(false); loadTasks() } catch (e) { setMsg(e.message) }
+        try { await createTemplate({ title_en: titleEn, title_zh: titleZh, group_letter: group, requires_photo: photo, standard, segment, role, optional }); setTitleEn(''); setTitleZh(''); setPhoto(false); setStandard(''); loadTasks() } catch (e) { setMsg(e.message) }
       }}>{L.add}</button>
       {GROUPS.map((g) => {
         const items = tasks.filter((t) => (t.group_letter || 'A') === g)
@@ -57,7 +71,8 @@ export default function TasksPage({ lang }) {
             <h3 onClick={() => toggle('list-' + g)} style={{ cursor: 'pointer' }}>{isCollapsed ? '▸' : '▾'} {L.group} {g} ({items.length})</h3>
             {!isCollapsed && items.map((t) => (
               <div className="task" key={t.id}>
-                <b>{displayText(t.title, lang)}</b> {t.requires_photo && <span className="tag">📷</span>}
+                <b>{displayText(t.title, lang)}</b> {t.requires_photo && <span className="tag">📷</span>} {t.segment && <span className="tag">{t.segment}</span>} {t.optional && <span className="tag">{L.optional}</span>}
+                {t.standard && <p className="muted">{t.standard}</p>}
                 <button className="btn2" onClick={async () => { await deleteTemplate(t.id); loadTasks() }}>{L.delete}</button>
               </div>
             ))}
