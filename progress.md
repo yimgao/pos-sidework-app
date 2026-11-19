@@ -2,7 +2,7 @@
 
 > Spec-driven context file 6 of 6. What is done, what is next, what is blocked.
 > Update this file with every change. Last updated: 2026-11-18.
-> Repo head: `bfafa923` (2026-11-18, StorePulse rename).
+> Repo head: `625ae24f` (2026-11-18, Yardkoo theme + standard/multi photos + delete user + notifications + split login + responsive).
 
 ## Done (verified by API test + screenshot)
 
