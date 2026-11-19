@@ -70,6 +70,7 @@ class SideworkTemplate(Base):
     standard = Column(Text, default="")  # 这项该怎么做：员工做任务时看得到，经理/owner 在应用里填
     segment = Column(String(20), default="opening")  # opening / midday / evening
     optional = Column(Boolean, default=False)  # 中午段默认可选
+    standard_photo_path = Column(String(300), nullable=True)  # 标准参考图：经理上传的"应该做成这样"的照片
 
 
 class SideworkAssignment(Base):
@@ -101,6 +102,17 @@ class SideworkRecord(Base):
     review = Column(String(20), nullable=True)  # pass / fail
     review_note = Column(Text, default="")
     reviewed_by = Column(Integer, nullable=True)
+
+
+class SideworkPhoto(Base):
+    """一次完成可传多张照片：每张一张记录。record 的 photo_path/file_name
+    仍保留第一张（向后兼容，Review 页只读它）。"""
+    __tablename__ = "sidework_photos"
+    id = Column(Integer, primary_key=True)
+    record_id = Column(Integer, ForeignKey("sidework_records.id"), nullable=False)
+    photo_path = Column(String(300), nullable=False)
+    file_name = Column(String(200), nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
 
 
 class AIDraft(Base):

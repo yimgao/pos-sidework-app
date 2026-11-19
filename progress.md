@@ -2,7 +2,7 @@
 
 > Spec-driven context file 6 of 6. What is done, what is next, what is blocked.
 > Update this file with every change. Last updated: 2026-11-18.
-> Repo head: `35a1ec88` (2026-11-18, owner nav fix).
+> Repo head: `bfafa923` (2026-11-18, StorePulse rename).
 
 ## Done (verified by API test + screenshot)
 
@@ -23,6 +23,17 @@
 - Tech stack v2 scaffolding: TypeScript / Tailwind / Docker / PostgreSQL /
   OAuth / payments / SMS configs exist; only the core is actually built
   (see Blocked).
+
+## Yardkoo theme + standard/multi photos + delete user + notifications + split login + responsive (2026-11-18, spec specs/yardkoo-theme-and-task-photos.md)
+- **Inactive/login bug — root cause found:** only `PATCH /api/accounts` writes `is_active=False`; seed never sets it, default is True, no startup/migration path deactivates anyone. The demo staff were deactivated by tapping Deactivate while testing — not a code bug. Fix is UX: confirm before deactivating ("停用后该员工无法登录，确定停用？"), Inactive rows dimmed with amber pill, Activate stays prominent. No silent re-activation job added (would undo a deliberate manager decision). Verified on a fresh scratch DB: seeded staff active, anna/anna123 login 200.
+- **Tasks list:** row numbers are now the display index in the filtered list (never `sort_order`); backend `sort_order` = max in group + 1 (deactivated tasks no longer cause duplicates); blank title rejected (400). The "1"-titled row was user test data, not deleted.
+- **Standard photo + multi-photo:** `SideworkTemplate.standard_photo_path` + new `SideworkPhoto` table; `POST /api/sidework/templates/{id}/standard-photo` (manager); `POST /api/sidework/complete` takes multiple `files`; `POST /api/sidework/records/{id}/photos` adds photos to an existing record; `GET /api/sidework/my/today` returns `standard_photo_url` + `photos[]`. Today item: standard photo on top → standard text → your photos (multi, thumbnails) → notes → big ☑️ button. Photo + note still enforced (400 otherwise). No standard content invented — empty until the manager uploads.
+- **Delete user:** `DELETE /api/accounts/{id}`; manager deletes employees only, owner deletes anyone except self and the last owner; cascades schedules/assignments/records/photos; UI confirm dialog states what is deleted.
+- **Notifications:** `GET /api/notifications` built only from real tables — pending review aggregate, shift conflicts (next 7 days, "closing" = 23:00), today's non-keep AI suggestions, today's completions by employee. No clocked-in events (no data). Bell in top bar + mobile header, unread badge, dropdown, opening marks read (localStorage). Manager/owner see all, employee sees only own.
+- **Yardkoo theme + logo:** real logo from yardkoo.com (`Yardkoo-03.png`, the site's own apple-touch-icon) — the pixel-exact PNG is kept in `brand-assets/` outside the repo; the repo ships SVG recreations (`frontend/public/yardkoo-logo.svg` / `yardkoo-mark.svg`, same 4-petal mark + wordmark in `#305020`) because the GitHub push channel only accepts UTF-8 text files. Tokens recolored to the site palette — primary deep teal `#2F4F4F`, pale mint `#DFF0EB`/`#EDF3F1`, page `#F7F7F7`; Server/"all" role color teal. App name stays StorePulse; logo/wordmark is Yardkoo.
+- **Login split screen:** dark-teal brand panel (logo on white chip, badge, two-line headline, subtext, 3 green-check bullets) + "Welcome back" form (Username/Password, Sign in, QUICK DEMO LOGIN with Owner/Manager/Anna buttons that fill and submit). Username+password AND PIN toggle both kept; demo hint kept. Stacks on phone.
+- **Responsive (verified):** Playwright, no horizontal overflow at 1440×900, 1180×820 (iPad landscape), 820×1180 (iPad portrait), 390×844 (phone) for Login, Dashboard, Today (+ Tasks, Team & Roles, notifications panel on desktop). Sidebar on desktop/iPad-landscape, bottom nav on phone; top-bar search hidden ≤1100px; tables scroll inside their card; modal max-height 90vh. Screenshots `~/workspace/screenshots/pos-app/28`–`35`.
+- Verification: `npm run build` passes; `py_compile` passes; scratch-DB smoke test 29/29 (seed active + anna 200; complete 400/400/400/200; 2-photo round-trip + add 1 = 3; standard photo round-trips; blank title 400; sort_order unique; delete works, self-delete + manager-delete-owner refused, owner deletes manager ok; notifications real-only, employee scoped).
 
 ## BrewLab-style UI redesign (2026-11-18, spec specs/brewlab-ui-redesign.md)
 - Indigo design system (#4F46E5, page #F4F5FB, white cards radius 14px,

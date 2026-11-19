@@ -2,7 +2,7 @@
 // add-task form as a modal. Daily assignment kept, filtered by the same
 // role tab. Deleting a task still only deactivates it (history kept).
 import { useEffect, useState } from 'react'
-import { createTemplate, deleteTemplate, listAssignments, listEmployees, listRoles, listTemplates, saveAssignments, scheduledStaff, todayStr } from '../api'
+import { createTemplate, deleteTemplate, listAssignments, listEmployees, listRoles, listTemplates, saveAssignments, scheduledStaff, todayStr, uploadStandardPhoto } from '../api'
 import { dict, displayText } from '../i18n'
 import { roleLabel, roleStyle } from '../roles'
 
@@ -33,6 +33,7 @@ export default function TasksPage({ lang }) {
   const [role, setRole] = useState('all')
   const [optional, setOptional] = useState(false)
   const [roles, setRoles] = useState([])
+  const [stdFile, setStdFile] = useState(null)
 
   const loadTasks = () => listTemplates().then(setTasks).catch((e) => setMsg(e.message))
   const loadAssign = async (d, id) => {
@@ -48,10 +49,15 @@ export default function TasksPage({ lang }) {
     .sort((a, b) => (a.group_letter || 'A').localeCompare(b.group_letter || 'A') || (a.sort_order - b.sort_order))
 
   const submitAdd = async () => {
-    if (!titleEn.trim()) return
+    if (!titleEn.trim()) { setMsg(L.titleRequired); return }
     try {
-      await createTemplate({ title_en: titleEn, title_zh: titleZh, group_letter: group, requires_photo: photo, standard, segment, role, optional })
-      setTitleEn(''); setTitleZh(''); setPhoto(false); setStandard(''); setShowModal(false); loadTasks()
+      const created = await createTemplate({ title_en: titleEn, title_zh: titleZh, group_letter: group, requires_photo: photo, standard, segment, role, optional })
+      if (stdFile && created && created.id) {
+        const form = new FormData()
+        form.append('file', stdFile)
+        await uploadStandardPhoto(created.id, form)
+      }
+      setTitleEn(''); setTitleZh(''); setPhoto(false); setStandard(''); setStdFile(null); setShowModal(false); loadTasks()
     } catch (e) { setMsg(e.message) }
   }
 
@@ -76,17 +82,28 @@ export default function TasksPage({ lang }) {
           <h3 style={{ margin: 0 }}>{roleTab === 'all' ? L.allRoles : roleTab} ({visible.length})</h3>
           <button className="btn" onClick={() => setShowModal(true)}>+ {L.newTask}</button>
         </div>
-        {visible.map((t) => (
+        {visible.map((t, i) => (
           <div className="tpl-row" key={t.id}>
             <span className="drag-handle" title="Drag to reorder (coming soon)">⋮⋮</span>
-            <span className="tpl-order">{t.sort_order}</span>
+            <span className="tpl-order">{i + 1}</span>
             <div className="tpl-body">
               <b>{displayText(t.title, lang)}</b>{' '}
               <span className="pill" style={roleStyle(t.role)}>{roleLabel(t.role, L.allRoles)}</span>{' '}
               {t.requires_photo && <span className="tag">📷</span>}{' '}
               {t.segment && <span className="tag">{t.segment}</span>}{' '}
               {t.optional && <span className="tag">{L.optional}</span>}
+              {t.standard_photo_url && <div className="std-photo"><img src={t.standard_photo_url} alt="" style={{ maxWidth: 240 }} /></div>}
               {t.standard && <p className="standard">{t.standard}</p>}
+              <div style={{ marginTop: 6 }}>
+                <label className="muted" style={{ fontSize: 13 }}>{t.standard_photo_url ? L.changeStandardPhoto : L.standardPhoto}: </label>
+                <input type="file" accept="image/*" style={{ width: 'auto', display: 'inline-block' }} onChange={async (e) => {
+                  if (!e.target.files.length) return
+                  const form = new FormData()
+                  form.append('file', e.target.files[0])
+                  try { await uploadStandardPhoto(t.id, form); loadTasks() } catch (err) { setMsg(err.message) }
+                  e.target.value = ''
+                }} />
+              </div>
             </div>
             <button className="btn2" onClick={async () => { await deleteTemplate(t.id); loadTasks() }}>{L.delete}</button>
           </div>
@@ -138,6 +155,8 @@ export default function TasksPage({ lang }) {
             <label><input type="checkbox" checked={optional} onChange={(e) => setOptional(e.target.checked)} /> {L.optional}</label>
             <label className="field">{L.standard}</label>
             <input placeholder={L.standard} value={standard} onChange={(e) => setStandard(e.target.value)} />
+            <label className="field">{L.standardPhoto}</label>
+            <input type="file" accept="image/*" onChange={(e) => setStdFile(e.target.files[0] || null)} />
             <label><input type="checkbox" checked={photo} onChange={(e) => setPhoto(e.target.checked)} /> {L.photoRequired}</label>
             <div className="modal-actions">
               <button className="btn2" onClick={() => setShowModal(false)}>{L.cancel}</button>

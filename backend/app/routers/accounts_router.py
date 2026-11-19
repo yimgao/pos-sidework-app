@@ -5,7 +5,8 @@ from sqlalchemy.orm import Session
 
 from ..auth import get_current_user, hash_password, require_manager
 from ..database import get_db
-from ..models import Employee
+from ..models import (Employee, Schedule, SideworkAssignment, SideworkPhoto,
+                      SideworkRecord)
 
 router = APIRouter(prefix="/api/accounts", tags=["accounts"])
 
@@ -78,3 +79,30 @@ def update_account(account_id: int, body: AccountPatch, db: Session = Depends(ge
         e.is_active = body.is_active
     db.commit(); db.refresh(e)
     return _out(e)
+
+
+@router.delete("/{account_id}")
+def delete_account(account_id: int, db: Session = Depends(get_db),
+                   user: Employee = Depends(require_manager)):
+    """真删账号（用户 2026-11-18 明确要的；停用之外再给一个删除）。
+    经理只能删员工；owner 除自己和最后一个 owner 外都能删。
+    连带删掉该员工的排班、分配、sidework 记录及照片行。"""
+    e = db.query(Employee).filter(Employee.id == account_id).first()
+    if not e:
+        raise HTTPException(status_code=404, detail="账号不存在")
+    if e.id == user.id:
+        raise HTTPException(status_code=400, detail="不能删自己的账号")
+    if not user.is_owner and (e.is_manager or e.is_owner):
+        raise HTTPException(status_code=403, detail="经理只能删员工账号")
+    if e.is_owner:
+        owners = db.query(Employee).filter(Employee.is_owner == True).count()  # noqa: E712
+        if owners <= 1:
+            raise HTTPException(status_code=400, detail="不能删最后一个 owner 账号")
+    rec_ids = [r.id for r in db.query(SideworkRecord).filter(SideworkRecord.employee_id == e.id).all()]
+    if rec_ids:
+        db.query(SideworkPhoto).filter(SideworkPhoto.record_id.in_(rec_ids)).delete(synchronize_session=False)
+    db.query(SideworkRecord).filter(SideworkRecord.employee_id == e.id).delete(synchronize_session=False)
+    db.query(SideworkAssignment).filter(SideworkAssignment.employee_id == e.id).delete(synchronize_session=False)
+    db.query(Schedule).filter(Schedule.employee_id == e.id).delete(synchronize_session=False)
+    db.delete(e); db.commit()
+    return {"id": account_id, "deleted": True}

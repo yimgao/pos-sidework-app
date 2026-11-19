@@ -1,18 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-/* BrewLab-style design system (2026-11-18 redesign): indigo primary,
-   light lavender-gray page, white cards, soft shadows, role pills.
-   Tailwind directives stay at the top; most components still use
-   hand-written CSS below. */
+/* Yardkoo theme (2026-11-18, from yardkoo.com): deep slate teal #2F4F4F,
+   site text teal #355858, pale mint #DFF0EB / #EDF3F1, page #F7F7F7,
+   logo green #305020. Tailwind directives stay at the top; most
+   components still use hand-written CSS below. */
 :root{
-  --bg:#F4F5FB; --card:#fff; --text:#111827; --secondary:#6B7280;
-  --border:#E5E7EB; --blue:#4F46E5; --blue-soft:rgba(79,70,229,.10);
-  --indigo:#4F46E5; --indigo-dark:#4338CA; --indigo-soft:rgba(79,70,229,.10);
+  --bg:#F7F7F7; --card:#fff; --text:#1F2A2A; --secondary:#6B7280;
+  --border:#E5E7EB; --blue:#2F4F4F; --blue-soft:rgba(47,79,79,.10);
+  --indigo:#2F4F4F; --indigo-dark:#243D3D; --indigo-soft:rgba(47,79,79,.10);
+  --brand-green:#305020; --mint:#DFF0EB; --mint-soft:#EDF3F1;
   --green:#16A34A; --green-soft:rgba(22,163,74,.12);
   --red:#DC2626; --red-soft:rgba(220,38,38,.10);
   --orange:#EA580C; --amber:#D97706; --amber-soft:#FEF3C7;
-  --fill:#F3F4F6; --track:#E5E7EB;
+  --fill:#EDF3F1; --track:#DCE8E4;
 }
 *{box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",Arial,sans-serif;margin:0;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;line-height:1.5;font-size:15px}
@@ -80,7 +81,7 @@ button.green{background:var(--green)} button.red{background:var(--red)}
 .shift-chip{display:inline-block;padding:5px 10px;border-radius:8px;font-size:13px;font-weight:600;line-height:1.3;margin:2px 0}
 /* Modal (Add task) */
 .modal-overlay{position:fixed;inset:0;background:rgba(17,24,39,.45);z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:48px 16px;overflow-y:auto}
-.modal{background:#fff;border-radius:16px;box-shadow:0 20px 50px rgba(0,0,0,.25);width:100%;max-width:520px;padding:24px}
+.modal{background:#fff;border-radius:16px;box-shadow:0 20px 50px rgba(0,0,0,.25);width:100%;max-width:520px;max-height:calc(100vh - 96px);overflow-y:auto;padding:24px}
 .modal h3{margin:0 0 4px;font-size:19px}
 .modal .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
 .modal label.field{display:block;font-size:14px;font-weight:600;margin:12px 0 2px}
@@ -92,7 +93,7 @@ button.green{background:var(--green)} button.red{background:var(--red)}
 .schedule-grid .grid-cell:hover{background:var(--indigo-soft)}
 .schedule-grid .grid-cell.editing{cursor:default;background:#fff;border:2px solid var(--indigo)}
 .schedule-grid .grid-cell select{width:auto;min-width:110px}
-input:focus,select:focus,textarea:focus{outline:2px solid rgba(79,70,229,.35);background:#fff}
+input:focus,select:focus,textarea:focus{outline:2px solid rgba(47,79,79,.35);background:#fff}
 table{width:100%;border-collapse:collapse;font-size:15px} th{color:var(--secondary);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;padding:12px 8px;text-align:left;border-bottom:1px solid var(--border)} td{padding:12px 8px;border-bottom:1px solid #F3F4F6;vertical-align:middle}
 img.thumb{width:100%;max-width:320px;border-radius:12px;margin-top:8px}
 .task{background:#FBFBFD;border:1px solid var(--border);border-radius:12px;padding:16px;margin:12px 0}
@@ -107,17 +108,65 @@ pre{white-space:pre-wrap;background:#FBFBFD;border:1px solid var(--border);borde
 button.user-card{width:100%;text-align:left;background:transparent;border:0;padding:0;cursor:pointer;color:var(--text);font-family:inherit}
 .avatar{width:36px;height:36px;border-radius:50%;background:var(--blue-soft);color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
 button.user-card:hover{opacity:1}
-button.user-card:hover .avatar{box-shadow:0 0 0 2px rgba(79,70,229,.3)}
-/* 登录 */
-.login-wrap{max-width:420px;margin:0 auto;padding-top:80px}
-.login-card{text-align:center;padding:32px 28px}
-.login-mark{width:56px;height:56px;border-radius:16px;background:var(--blue-soft);color:var(--blue);display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
-.login-card h1{font-size:28px;margin:0 0 4px;letter-spacing:-.02em}
-.login-btn{width:100%;margin:12px 0}
+button.user-card:hover .avatar{box-shadow:0 0 0 2px rgba(47,79,79,.3)}
+/* Yardkoo brand: real logo file from yardkoo.com (public/yardkoo-logo.png).
+   Wide logo in the sidebar / login; circular mark when the sidebar is collapsed. */
+.brand-logo{height:46px;width:auto;max-width:210px;object-fit:contain;display:block}
+.brand-mark-img{width:40px;height:40px;border-radius:12px;object-fit:cover;flex-shrink:0;display:none}
+.sidebar.collapsed .brand-logo{display:none}
+.sidebar.collapsed .brand-mark-img{display:block}
+/* Standard reference photo (top of a Today item) + multi-photo thumbnails */
+.std-photo{margin:10px 0 4px}
+.std-photo img{width:100%;max-width:420px;border-radius:12px;display:block}
+.std-label{font-size:13px;font-weight:600;color:var(--secondary);margin:10px 0 0}
+.photo-grid{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.photo-grid img{width:96px;height:96px;object-fit:cover;border-radius:10px;border:1px solid var(--border)}
+.btn-complete{width:100%;padding:14px 18px;font-size:16px;margin:10px 0 0}
+.btn-complete:disabled{opacity:.55;cursor:not-allowed}
+/* Inactive account rows: visibly dimmed, never looks like a normal row */
+tr.row-inactive{opacity:.62}
+tr.row-inactive td:first-child{border-left:3px solid var(--amber)}
+/* Notifications bell + dropdown (top bar + mobile header) */
+.notif-wrap{position:relative;flex-shrink:0}
+.notif-bell{position:relative;width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:#fff;color:var(--text);display:flex;align-items:center;justify-content:center;font-size:18px}
+.notif-badge{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:999px;background:var(--red);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.notif-panel{position:absolute;right:0;top:48px;width:360px;max-width:calc(100vw - 32px);max-height:70vh;overflow-y:auto;background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 16px 40px rgba(0,0,0,.18);z-index:60;text-align:left}
+.notif-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border)}
+.notif-head b{font-size:15px}
+.notif-item{display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid #F3F4F6}
+.notif-item:last-child{border-bottom:0}
+.notif-dot{width:9px;height:9px;border-radius:50%;margin-top:6px;flex-shrink:0}
+.notif-item b{font-size:14px;display:block}
+.notif-item p{margin:2px 0 0;color:var(--secondary);font-size:13px}
+.notif-time{color:var(--secondary);font-size:12px;white-space:nowrap}
+/* Split-screen login (desktop ≥900px): dark Yardkoo panel + form */
+.login-split{min-height:100vh;display:flex;flex-direction:column}
+.login-brand{background:linear-gradient(160deg,#1D3434 0%,#2F4F4F 60%,#355858 100%);color:#fff;padding:36px 28px;display:flex;flex-direction:column;gap:14px}
+.login-brand .badge{align-self:flex-start;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);color:#DFF0EB;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.04em}
+.login-brand h1{font-size:32px;line-height:1.15;margin:0;letter-spacing:-.01em}
+.login-brand p{margin:0;color:#C4D9D3;font-size:15px}
+.login-brand ul{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
+.login-brand li{display:flex;gap:10px;align-items:flex-start;font-size:15px;color:#EDF3F1}
+.login-brand li .tick{color:#4ADE80;font-weight:700;flex-shrink:0}
+.login-brand img{width:220px;max-width:70%;height:auto}
+.login-form-col{flex:1;display:flex;align-items:center;justify-content:center;padding:32px 20px;background:var(--bg)}
+.login-form{width:100%;max-width:400px}
+.login-form h2{font-size:24px;margin:0 0 4px}
+.login-form .field-label{display:block;font-size:14px;font-weight:600;margin:14px 0 2px}
+.login-divider{display:flex;align-items:center;gap:12px;color:var(--secondary);font-size:12px;font-weight:700;letter-spacing:.06em;margin:20px 0 10px}
+.login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.demo-row{display:flex;gap:8px;flex-wrap:wrap}
+.demo-row .btn2{flex:1;min-width:100px}
+@media (min-width:900px){
+  .login-split{flex-direction:row}
+  .login-brand{flex:1;max-width:560px;justify-content:center;padding:48px}
+  .login-brand h1{font-size:40px}
+  .login-form-col{flex:1}
+}
 /* 电脑端：左侧竖导航 + 顶栏 */
 .sidebar{display:none}
 .topbar{display:none}
-.mobile-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;position:sticky;top:0;z-index:20;background:rgba(244,245,251,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.mobile-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;position:sticky;top:0;z-index:20;background:rgba(247,247,247,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
 .mobile-header b{font-size:17px}
 .mobile-header span{color:var(--secondary);font-size:14px}
 .bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:space-around;background:rgba(255,255,255,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);padding:8px 4px calc(8px + env(safe-area-inset-bottom))}
@@ -132,8 +181,8 @@ button.user-card:hover .avatar{box-shadow:0 0 0 2px rgba(79,70,229,.3)}
   .sidebar.collapsed{width:78px;padding:24px 10px}
   .sidebar.collapsed .brand div:last-child,.sidebar.collapsed .nav-label,.sidebar.collapsed .side-nav button span,.sidebar.collapsed .user-meta,.sidebar.collapsed .collapse-btn span{display:none}
   .sidebar.collapsed .side-nav button,.sidebar.collapsed .brand{justify-content:center;padding:10px}
-  .brand{display:flex;gap:12px;align-items:center;padding:4px 8px 20px}
-  .brand-mark{width:40px;height:40px;border-radius:12px;background:var(--indigo);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .sidebar.collapsed .brand{align-items:center}
+  .brand{display:flex;flex-direction:column;gap:8px;align-items:flex-start;padding:4px 8px 20px}
   .brand b{display:block;font-size:17px}
   .brand small{color:var(--secondary);font-size:12px}
   .nav-label{font-size:11px;font-weight:600;color:var(--secondary);text-transform:uppercase;letter-spacing:.06em;padding:16px 12px 6px;margin:0}
@@ -153,12 +202,23 @@ button.user-card:hover .avatar{box-shadow:0 0 0 2px rgba(79,70,229,.3)}
   .user-meta small{color:var(--secondary);font-size:12px}
   .maincol{flex:1;min-width:0}
   .topbar{display:flex;align-items:center;gap:16px;padding:14px 32px;background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20}
-  .topbar-store{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:700;min-width:140px}
-  .topbar-search{flex:1;max-width:420px;margin:0;background:var(--fill);border:1px solid transparent}
+  .topbar-store{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:700;min-width:0;flex-shrink:0}
+  .topbar-search{flex:1;max-width:420px;min-width:0;margin:0;background:var(--fill);border:1px solid transparent}
   .topbar-user{margin-left:auto;display:flex;gap:10px;align-items:center;border:0;background:transparent;padding:4px;text-align:left}
   .topbar-user b{display:block;font-size:14px}
   .topbar-user small{color:var(--secondary);font-size:12px}
   main{padding:28px 32px;max-width:1080px}
+}
+/* Tables scroll inside their card on narrow screens instead of overflowing the page */
+.table-scroll{overflow-x:auto;margin:0 -4px;padding:0 4px}
+.table-scroll table{min-width:620px}
+/* iPad portrait (768–1100px): sidebar + content are narrow — hide the
+   decorative top-bar search and the user-chip text, keep avatar + bell. */
+@media (max-width:1100px){
+  .topbar-search{display:none}
+  .topbar-user .user-meta{display:none}
+  .topbar{padding:12px 20px}
+  main{padding:20px}
 }
 @media (max-width:767px){
   main{padding:16px;padding-bottom:110px}
@@ -167,4 +227,6 @@ button.user-card:hover .avatar{box-shadow:0 0 0 2px rgba(79,70,229,.3)}
   .login-wrap{padding:48px 16px 16px}
   .sidebar{display:none}
   .stat-grid{grid-template-columns:repeat(2,1fr)}
+  .modal{padding:20px}
+  .topbar-search{display:none}
 }

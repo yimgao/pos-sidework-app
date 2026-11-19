@@ -8,7 +8,7 @@ export function roleKey(role) {
 }
 
 const MAP = {
-  server: { bg: '#EEF2FF', fg: '#4F46E5', avatar: '#4F46E5' },
+  server: { bg: '#DFF0EB', fg: '#2F4F4F', avatar: '#2F4F4F' },
   busser: { bg: '#FEF3C7', fg: '#B45309', avatar: '#F59E0B' },
   bar: { bg: '#FEF3C7', fg: '#B45309', avatar: '#F59E0B' },
   host: { bg: '#CFFAFE', fg: '#0E7490', avatar: '#06B6D4' },
@@ -18,7 +18,7 @@ const MAP = {
   cashier: { bg: '#D1FAE5', fg: '#047857', avatar: '#10B981' },
   'shift lead': { bg: '#EDE9FE', fg: '#6D28D9', avatar: '#8B5CF6' },
   dishwasher: { bg: '#F3F4F6', fg: '#4B5563', avatar: '#6B7280' },
-  all: { bg: '#EEF2FF', fg: '#4F46E5', avatar: '#4F46E5' },
+  all: { bg: '#DFF0EB', fg: '#2F4F4F', avatar: '#2F4F4F' },
 }
 const FALLBACK = { bg: '#F3F4F6', fg: '#4B5563', avatar: '#6B7280' }
 

@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from .routers import (accounts_router, ai_router, auth_router, dashboard_router,
-                      employees_router, report_router, review_router, roles_router,
+                      employees_router, notifications_router, report_router, review_router, roles_router,
                       schedule_router, settings_router, sidework_router)
 from .seed import seed
 
@@ -37,6 +37,7 @@ app.include_router(schedule_router.router)
 app.include_router(sidework_router.router)
 app.include_router(review_router.router)
 app.include_router(report_router.router)
+app.include_router(notifications_router.router)
 
 
 @app.get("/api/health")

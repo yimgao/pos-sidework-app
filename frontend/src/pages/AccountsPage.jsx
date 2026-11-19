@@ -1,7 +1,7 @@
 // Team & Roles: member table with avatar + role pills + status, working
 // name search. Add-account form, roles management and owner settings kept.
 import { useEffect, useState } from 'react'
-import { createAccount, createRole, deleteRole, getSettings, listAccounts, listRoles, setSetting, updateAccount } from '../api'
+import { createAccount, createRole, deleteAccount, deleteRole, getSettings, listAccounts, listRoles, setSetting, updateAccount } from '../api'
 import { dict } from '../i18n'
 import { initials, roleAvatarColor, roleLabel, roleStyle } from '../roles'
 
@@ -33,11 +33,12 @@ export default function AccountsPage({ user, lang }) {
       </div>
       <div className="card">
         <input className="topbar-search" style={{ maxWidth: 320, margin: '0 0 8px' }} placeholder={L.searchPlaceholder} value={query} onChange={(e) => setQuery(e.target.value)} />
+        <div className="table-scroll">
         <table>
           <thead><tr><th>{L.member}</th><th>{L.staffRoles}</th><th>{L.status}</th><th>{L.appRole}</th><th></th></tr></thead>
           <tbody>
             {shown.map((a) => (
-              <tr key={a.id}>
+              <tr key={a.id} className={a.is_active ? '' : 'row-inactive'}>
                 <td>
                   <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                     <div className="avatar" style={{ background: roleAvatarColor(a.role), color: '#fff' }}>{initials(a.name)}</div>
@@ -46,17 +47,25 @@ export default function AccountsPage({ user, lang }) {
                 </td>
                 <td><span className="pill" style={roleStyle(a.role)}>{roleLabel(a.role)}</span></td>
                 <td>
-                  <span style={{ color: a.is_active ? '#16A34A' : '#9CA3AF' }}>●</span>{' '}
+                  <span style={{ color: a.is_active ? '#16A34A' : '#D97706' }}>●</span>{' '}
                   {a.is_active ? L.active : L.inactive}
                 </td>
                 <td>{a.is_owner ? 'Owner' : a.is_manager ? 'Manager' : 'Staff'}</td>
-                <td>
-                  <button className="btn2" onClick={async () => { await updateAccount(a.id, { is_active: !a.is_active }); load() }}>{a.is_active ? L.deactivate : L.activate}</button>
+                <td style={{ whiteSpace: 'nowrap' }}>
+                  <button className="btn2" onClick={async () => {
+                    if (a.is_active && !window.confirm(L.deactivateConfirm.replace('{name}', a.name))) return
+                    await updateAccount(a.id, { is_active: !a.is_active }); load()
+                  }}>{a.is_active ? L.deactivate : L.activate}</button>
+                  <button className="btn2" style={{ color: '#DC2626' }} onClick={async () => {
+                    if (!window.confirm(L.deleteConfirm.replace('{name}', a.name))) return
+                    try { await deleteAccount(a.id); load() } catch (e) { setMsg(e.message) }
+                  }}>{L.delete}</button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+        </div>
         {!shown.length && <p className="muted">—</p>}
       </div>
       <div className="card">

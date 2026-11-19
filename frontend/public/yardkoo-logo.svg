@@ -1,0 +1,16 @@
+<!-- Yardkoo logo (SVG recreation of the real logo from yardkoo.com,
+     file Yardkoo-03.png: dark forest-green #305020 circular 4-petal mark
+     + "YARDKOO" serif letterspaced + "SEAFOOD & GRILL" below).
+     Recreated as SVG because the GitHub push channel only accepts UTF-8
+     text files — the pixel-exact PNG is kept in brand-assets/ for download. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 280" width="1200" height="280" role="img" aria-label="Yardkoo Seafood and Grill">
+  <g fill="#305020">
+    <path d="M125 140 C100 90 100 55 125 35 C150 55 150 90 125 140 Z"/>
+    <path d="M125 140 C100 90 100 55 125 35 C150 55 150 90 125 140 Z" transform="rotate(90 125 140)"/>
+    <path d="M125 140 C100 90 100 55 125 35 C150 55 150 90 125 140 Z" transform="rotate(180 125 140)"/>
+    <path d="M125 140 C100 90 100 55 125 35 C150 55 150 90 125 140 Z" transform="rotate(270 125 140)"/>
+    <circle cx="125" cy="140" r="7" fill="#fff"/>
+  </g>
+  <text x="280" y="158" font-family="Georgia, 'Times New Roman', serif" font-size="92" fill="#305020" textLength="860" lengthAdjust="spacingAndGlyphs">YARDKOO</text>
+  <text x="282" y="212" font-family="Georgia, 'Times New Roman', serif" font-size="30" fill="#305020" textLength="856" lengthAdjust="spacingAndGlyphs">SEAFOOD &amp; GRILL</text>
+</svg>

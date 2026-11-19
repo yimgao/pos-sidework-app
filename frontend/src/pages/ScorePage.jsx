@@ -51,6 +51,7 @@ export default function ScorePage({ user, lang }) {
     <div>
       <div className="page-head"><h2>{L.analyticsTitle}</h2><p className="muted">{L.allTitle}</p></div>
       <div className="card">
+        <div className="table-scroll">
         <table><thead><tr><th>{L.employee}</th><th>{L.todayScore}</th><th>{L.rollingTitle}</th><th>{L.completed}</th><th>{L.passed}</th><th>{L.late}</th></tr></thead>
           <tbody>{data.map((s) => (
             <tr key={s.employee_id}>
@@ -68,6 +69,7 @@ export default function ScorePage({ user, lang }) {
             </tr>
           ))}</tbody>
         </table>
+        </div>
       </div>
     </div>
   )

@@ -1,0 +1,12 @@
+<!-- Yardkoo circular 4-petal mark (SVG recreation of the real logo from
+     yardkoo.com, file Yardkoo-03.png). Used where the sidebar is collapsed
+     and as the favicon. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Yardkoo">
+  <g fill="#305020">
+    <path d="M256 256 C206 156 206 86 256 46 C306 86 306 156 256 256 Z"/>
+    <path d="M256 256 C206 156 206 86 256 46 C306 86 306 156 256 256 Z" transform="rotate(90 256 256)"/>
+    <path d="M256 256 C206 156 206 86 256 46 C306 86 306 156 256 256 Z" transform="rotate(180 256 256)"/>
+    <path d="M256 256 C206 156 206 86 256 46 C306 86 306 156 256 256 Z" transform="rotate(270 256 256)"/>
+    <circle cx="256" cy="256" r="14" fill="#fff"/>
+  </g>
+</svg>

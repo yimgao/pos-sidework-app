@@ -38,6 +38,7 @@ def ensure_new_columns():
     _add("sidework_templates", "standard", "standard TEXT DEFAULT ''")
     _add("sidework_templates", "segment", "segment VARCHAR(20) DEFAULT 'opening'")
     _add("sidework_templates", "optional", "optional BOOLEAN DEFAULT 0")
+    _add("sidework_templates", "standard_photo_path", "standard_photo_path VARCHAR(300)")
     _add("employees", "username", "username VARCHAR(100)")
     _add("employees", "password_hash", "password_hash VARCHAR(200)")
     _add("employees", "is_owner", "is_owner BOOLEAN DEFAULT 0")
