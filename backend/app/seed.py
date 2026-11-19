@@ -21,11 +21,24 @@ TASKS = [
 ]
 
 
+DEFAULT_ROLES = ["Server", "Cook", "Manager", "Host", "Busser", "Bar"]
+
+
+def ensure_roles(db: Session):
+    """幂等：每次启动都补齐缺失的岗位（老数据库只有 Server/Cook/Manager/Host）。"""
+    existing = {r.name for r in db.query(Role).all()}
+    for name in DEFAULT_ROLES:
+        if name not in existing:
+            db.add(Role(name=name))
+    db.commit()
+
+
 def seed():
     Base.metadata.create_all(bind=engine)
     ensure_new_columns()
     db: Session = SessionLocal()
     try:
+        ensure_roles(db)
         if db.query(Employee).count():
             return
         owner = Employee(name="Owner", role="owner", pin_hash=hash_pin("000000"), username="owner",
@@ -39,7 +52,6 @@ def seed():
         chris = Employee(name="Chris", role="server", pin_hash=hash_pin("3333"), username="chris",
                          password_hash=hash_password("chris123"))
         db.add_all([owner, manager, anna, ben, chris]); db.flush()
-        db.add_all([Role(name="Server"), Role(name="Cook"), Role(name="Manager"), Role(name="Host")])
         db.add(AppSetting(key="manager_can_see_person_reports", value="true"))
         # 班次只叫名字，不带时间：Lunch shift / Dinner shift / Morning shift 等，
         # 自定义时间另外由经理在排班页选，不混在名字里。

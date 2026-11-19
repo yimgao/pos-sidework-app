@@ -1,37 +1,101 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-/* Apple 风格设计系统：浅灰底、白卡、蓝主色、圆角大、留白多 */
-:root{--bg:#F5F5F7;--card:#fff;--text:#1D1D1F;--secondary:#86868B;--border:#E5E5EA;--blue:#007AFF;--blue-soft:rgba(0,122,255,.12);--green:#34C759;--red:#FF3B30;--orange:#FF9500;--fill:#F2F2F7}
+/* BrewLab-style design system (2026-11-18 redesign): indigo primary,
+   light lavender-gray page, white cards, soft shadows, role pills.
+   Tailwind directives stay at the top; most components still use
+   hand-written CSS below. */
+:root{
+  --bg:#F4F5FB; --card:#fff; --text:#111827; --secondary:#6B7280;
+  --border:#E5E7EB; --blue:#4F46E5; --blue-soft:rgba(79,70,229,.10);
+  --indigo:#4F46E5; --indigo-dark:#4338CA; --indigo-soft:rgba(79,70,229,.10);
+  --green:#16A34A; --green-soft:rgba(22,163,74,.12);
+  --red:#DC2626; --red-soft:rgba(220,38,38,.10);
+  --orange:#EA580C; --amber:#D97706; --amber-soft:#FEF3C7;
+  --fill:#F3F4F6; --track:#E5E7EB;
+}
 *{box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",Arial,sans-serif;margin:0;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;line-height:1.5}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",Arial,sans-serif;margin:0;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;line-height:1.5;font-size:15px}
 button{font-family:inherit;cursor:pointer}
 button:active{opacity:.75}
 main{padding:20px;max-width:1080px;margin:0 auto}
-.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px;margin-bottom:16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
-.card h2{font-size:22px;font-weight:700;margin:0 0 6px;letter-spacing:-.02em}
-.card h3{font-size:17px;font-weight:600;margin:16px 0 8px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.06)}
+.card h2{font-size:20px;font-weight:700;margin:0 0 6px;letter-spacing:-.01em}
+.card h3{font-size:16px;font-weight:600;margin:16px 0 8px}
 .muted{color:var(--secondary);font-size:14px}
 .error{color:var(--red)}
-input,select,textarea{width:100%;padding:12px 14px;margin:6px 0;border:1px solid transparent;border-radius:12px;font-size:16px;background:var(--fill);color:var(--text)}
+input,select,textarea{width:100%;padding:11px 14px;margin:6px 0;border:1px solid var(--border);border-radius:10px;font-size:15px;background:#fff;color:var(--text)}
 input[type=checkbox]{width:auto;margin:0 8px 0 0;vertical-align:middle}
+input[type=file]{background:var(--fill);border-style:dashed}
+/* Page header (title + subtitle above the cards) */
+.page-head{margin-bottom:16px}
+.page-head h2{font-size:22px;font-weight:700;margin:0 0 4px;letter-spacing:-.01em}
+.page-head p{margin:2px 0}
+/* Buttons: indigo primary, light gray secondary */
+button.btn{background:var(--indigo);color:#fff;border:0;padding:11px 18px;border-radius:10px;font-size:15px;font-weight:600;margin:6px 6px 6px 0}
+button.btn:hover{background:var(--indigo-dark)}
+button.btn2{background:#F3F4F6;color:var(--text);border:0;padding:9px 14px;border-radius:10px;font-size:14px;font-weight:500;margin:4px 4px 4px 0}
+button.btn2:hover{background:#E5E7EB}
+button.green{background:var(--green)} button.red{background:var(--red)}
+/* Tags (old status pills) + role pills (new, color from roles.js inline style) */
+.tag{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600;background:var(--fill);color:#4B5563}
+.tag.ok{background:var(--green-soft);color:#15803D} .tag.bad{background:var(--red-soft);color:#B91C1C} .tag.warn{background:var(--amber-soft);color:#B45309}
+.pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+/* Progress bar: light track, indigo fill (orange/green via inline style) */
+.progress{background:var(--track);border-radius:999px;height:8px;overflow:hidden;margin:10px 0 4px}
+.progress > i{display:block;height:100%;background:var(--indigo);border-radius:999px}
+/* Stat cards row (Live Operations / Analytics) */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;box-shadow:0 1px 3px rgba(16,24,40,.06)}
+.stat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.stat-label{color:var(--secondary);font-size:13px;font-weight:500}
+.stat-value{font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1.2}
+.stat-sub{color:var(--secondary);font-size:13px}
+/* Checklist cards (Today) */
+.check-card{padding:0;overflow:hidden}
+.check-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:18px 20px 0}
+.check-head b{font-size:16px}
+.check-head .progress{margin:12px 20px 0}
+.check-item{padding:16px 20px;border-top:1px solid #F3F4F6}
+.check-item:first-of-type{border-top:0}
+.check-row{display:flex;gap:12px;align-items:flex-start}
+.check-circle{width:24px;height:24px;border-radius:50%;border:2px solid #D1D5DB;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;background:#fff}
+.check-circle.done{background:var(--green);border-color:var(--green)}
+.done-title{text-decoration:line-through;color:var(--secondary)}
+.check-body{flex:1;min-width:0}
+.check-body .standard{color:var(--secondary);font-size:14px;margin:6px 0}
+.completed-line{color:var(--green);font-size:13px;margin-top:6px}
+/* Role filter tabs + AI Assistant tabs */
+.role-tabs,.ai-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}
+.role-tabs button,.ai-tabs button{border:1px solid var(--border);background:#fff;padding:8px 14px;border-radius:999px;font-size:14px;font-weight:600;color:var(--text)}
+.role-tabs button.active,.ai-tabs button.active{background:var(--indigo);border-color:var(--indigo);color:#fff}
+/* Task rows (Checklist Templates) */
+.tpl-row{display:flex;gap:12px;align-items:flex-start;padding:14px 4px;border-top:1px solid #F3F4F6}
+.tpl-row:first-of-type{border-top:0}
+.drag-handle{color:#D1D5DB;font-size:16px;line-height:1.4;cursor:grab;flex-shrink:0;user-select:none}
+.tpl-order{color:var(--secondary);font-size:13px;min-width:20px;text-align:right;padding-top:2px}
+.tpl-body{flex:1;min-width:0}
+.tpl-body .standard{color:var(--secondary);font-size:14px;margin:4px 0 0}
+/* Shift chips (Schedule grid) */
+.shift-chip{display:inline-block;padding:5px 10px;border-radius:8px;font-size:13px;font-weight:600;line-height:1.3;margin:2px 0}
+/* Modal (Add task) */
+.modal-overlay{position:fixed;inset:0;background:rgba(17,24,39,.45);z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:48px 16px;overflow-y:auto}
+.modal{background:#fff;border-radius:16px;box-shadow:0 20px 50px rgba(0,0,0,.25);width:100%;max-width:520px;padding:24px}
+.modal h3{margin:0 0 4px;font-size:19px}
+.modal .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.modal label.field{display:block;font-size:14px;font-weight:600;margin:12px 0 2px}
 /* Excel 式排班表：格子线、悬停、点格子编辑 */
 .schedule-grid{border-collapse:collapse;min-width:720px}
-.schedule-grid th,.schedule-grid td{border:1px solid #d9d9de;padding:10px 8px;vertical-align:top}
-.schedule-grid th{background:#f2f2f7;text-align:left}
+.schedule-grid th,.schedule-grid td{border:1px solid #E5E7EB;padding:10px 8px;vertical-align:top}
+.schedule-grid th{background:#F9FAFB;text-align:left}
 .schedule-grid .grid-cell{cursor:pointer;min-width:110px}
-.schedule-grid .grid-cell:hover{background:rgba(0,122,255,.08)}
-.schedule-grid .grid-cell.editing{cursor:default;background:#fff;border:2px solid #007aff}
+.schedule-grid .grid-cell:hover{background:var(--indigo-soft)}
+.schedule-grid .grid-cell.editing{cursor:default;background:#fff;border:2px solid var(--indigo)}
 .schedule-grid .grid-cell select{width:auto;min-width:110px}
-input:focus,select:focus,textarea:focus{outline:2px solid rgba(0,122,255,.35);background:#fff}
-button.btn{background:var(--blue);color:#fff;border:0;padding:12px 20px;border-radius:12px;font-size:16px;font-weight:600;margin:6px 6px 6px 0}
-button.btn2{background:#E8E8ED;color:var(--text);border:0;padding:9px 14px;border-radius:10px;font-size:14px;font-weight:500;margin:4px 4px 4px 0}
-button.green{background:var(--green)} button.red{background:var(--red)}
-.tag{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600;background:var(--fill);color:#6E6E73}
-.tag.ok{background:rgba(52,199,89,.15);color:#248A3D} .tag.bad{background:rgba(255,59,48,.12);color:#D70015} .tag.warn{background:rgba(255,149,0,.15);color:#B25E09}
-table{width:100%;border-collapse:collapse;font-size:15px} th{color:var(--secondary);font-size:13px;font-weight:600;padding:12px 8px;text-align:left;border-bottom:1px solid var(--border)} td{padding:12px 8px;border-bottom:1px solid #F2F2F7;vertical-align:top}
+input:focus,select:focus,textarea:focus{outline:2px solid rgba(79,70,229,.35);background:#fff}
+table{width:100%;border-collapse:collapse;font-size:15px} th{color:var(--secondary);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;padding:12px 8px;text-align:left;border-bottom:1px solid var(--border)} td{padding:12px 8px;border-bottom:1px solid #F3F4F6;vertical-align:middle}
 img.thumb{width:100%;max-width:320px;border-radius:12px;margin-top:8px}
-.task{background:#FBFBFD;border:1px solid var(--border);border-radius:14px;padding:16px;margin:12px 0}
+.task{background:#FBFBFD;border:1px solid var(--border);border-radius:12px;padding:16px;margin:12px 0}
 pre{white-space:pre-wrap;background:#FBFBFD;border:1px solid var(--border);border-radius:12px;padding:16px;font-size:15px;line-height:1.6}
 /* 语言切换：EN / 中文 两个按钮 */
 .lang-switch{display:inline-flex;background:var(--fill);border-radius:999px;padding:3px;gap:3px}
@@ -43,51 +107,64 @@ pre{white-space:pre-wrap;background:#FBFBFD;border:1px solid var(--border);borde
 button.user-card{width:100%;text-align:left;background:transparent;border:0;padding:0;cursor:pointer;color:var(--text);font-family:inherit}
 .avatar{width:36px;height:36px;border-radius:50%;background:var(--blue-soft);color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
 button.user-card:hover{opacity:1}
-button.user-card:hover .avatar{box-shadow:0 0 0 2px rgba(0,122,255,.3)}
+button.user-card:hover .avatar{box-shadow:0 0 0 2px rgba(79,70,229,.3)}
 /* 登录 */
 .login-wrap{max-width:420px;margin:0 auto;padding-top:80px}
 .login-card{text-align:center;padding:32px 28px}
 .login-mark{width:56px;height:56px;border-radius:16px;background:var(--blue-soft);color:var(--blue);display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
 .login-card h1{font-size:28px;margin:0 0 4px;letter-spacing:-.02em}
 .login-btn{width:100%;margin:12px 0}
-/* 电脑端：左侧竖导航 */
+/* 电脑端：左侧竖导航 + 顶栏 */
 .sidebar{display:none}
-.mobile-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;position:sticky;top:0;z-index:20;background:rgba(245,245,247,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.topbar{display:none}
+.mobile-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;position:sticky;top:0;z-index:20;background:rgba(244,245,251,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
 .mobile-header b{font-size:17px}
 .mobile-header span{color:var(--secondary);font-size:14px}
 .bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:space-around;background:rgba(255,255,255,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);padding:8px 4px calc(8px + env(safe-area-inset-bottom))}
-.bottom-nav button{border:0;background:transparent;color:#8E8E93;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;padding:4px 10px}
-.bottom-nav button.active{color:var(--blue)}
-.bottom-nav button span{font-weight:500}
+.bottom-nav button{border:0;background:transparent;color:#9CA3AF;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;padding:4px 6px;min-width:0;flex:1}
+.bottom-nav button.active{color:var(--indigo)}
+.bottom-nav button span{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 @media (min-width:768px){
   .mobile-header{display:none}
   .bottom-nav{display:none}
   .layout{display:flex;align-items:flex-start;min-height:100vh}
-  .sidebar{display:flex;flex-direction:column;width:264px;flex-shrink:0;padding:24px 16px;background:#FBFBFD;border-right:1px solid var(--border);position:sticky;top:0;height:100vh}
+  .sidebar{display:flex;flex-direction:column;width:264px;flex-shrink:0;padding:24px 16px;background:#fff;border-right:1px solid var(--border);position:sticky;top:0;height:100vh}
+  .sidebar.collapsed{width:78px;padding:24px 10px}
+  .sidebar.collapsed .brand div:last-child,.sidebar.collapsed .nav-label,.sidebar.collapsed .side-nav button span,.sidebar.collapsed .user-meta,.sidebar.collapsed .collapse-btn span{display:none}
+  .sidebar.collapsed .side-nav button,.sidebar.collapsed .brand{justify-content:center;padding:10px}
   .brand{display:flex;gap:12px;align-items:center;padding:4px 8px 20px}
-  .brand-mark{width:40px;height:40px;border-radius:12px;background:var(--blue-soft);color:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .brand-mark{width:40px;height:40px;border-radius:12px;background:var(--indigo);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
   .brand b{display:block;font-size:17px}
   .brand small{color:var(--secondary);font-size:12px}
-  .nav-label{font-size:12px;font-weight:600;color:var(--secondary);text-transform:uppercase;letter-spacing:.05em;padding:16px 12px 6px;margin:0}
+  .nav-label{font-size:11px;font-weight:600;color:var(--secondary);text-transform:uppercase;letter-spacing:.06em;padding:16px 12px 6px;margin:0}
   .side-nav{display:flex;flex-direction:column;gap:2px}
   .side-nav button{border:0;background:transparent;display:flex;gap:12px;align-items:center;text-align:left;padding:10px 12px;border-radius:10px;color:var(--text);font-size:15px}
-  .side-nav button:hover{background:#EDEDEF}
-  .side-nav button.active{background:var(--blue-soft);color:var(--blue)}
+  .side-nav button:hover{background:#F3F4F6}
+  .side-nav button.active{background:var(--blue-soft);color:var(--indigo)}
   .side-nav button span{display:flex;flex-direction:column;line-height:1.2}
   .side-nav button b{font-weight:600}
   .side-nav button small{color:var(--secondary);font-size:12px;font-weight:400}
-  .side-nav button.active small{color:var(--blue)}
+  .side-nav button.active small{color:var(--indigo)}
+  .collapse-btn{border:0;background:transparent;display:flex;gap:10px;align-items:center;color:var(--secondary);font-size:14px;font-weight:500;padding:10px 12px;margin-top:8px;text-align:left}
+  .collapse-btn:hover{color:var(--text)}
   .user-card{margin-top:auto;display:flex;gap:10px;align-items:center;border-top:1px solid var(--border);padding-top:16px}
   .avatar{width:36px;height:36px;border-radius:50%;background:var(--blue-soft);color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
   .user-meta{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.2}
   .user-meta small{color:var(--secondary);font-size:12px}
   .maincol{flex:1;min-width:0}
-  main{padding:32px;max-width:1080px}
+  .topbar{display:flex;align-items:center;gap:16px;padding:14px 32px;background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20}
+  .topbar-store{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:700;min-width:140px}
+  .topbar-search{flex:1;max-width:420px;margin:0;background:var(--fill);border:1px solid transparent}
+  .topbar-user{margin-left:auto;display:flex;gap:10px;align-items:center;border:0;background:transparent;padding:4px;text-align:left}
+  .topbar-user b{display:block;font-size:14px}
+  .topbar-user small{color:var(--secondary);font-size:12px}
+  main{padding:28px 32px;max-width:1080px}
 }
 @media (max-width:767px){
   main{padding:16px;padding-bottom:110px}
-  .card{padding:16px;border-radius:16px}
+  .card{padding:16px;border-radius:14px}
   .card h2{font-size:20px}
   .login-wrap{padding:48px 16px 16px}
   .sidebar{display:none}
+  .stat-grid{grid-template-columns:repeat(2,1fr)}
 }

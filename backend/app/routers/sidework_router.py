@@ -138,7 +138,8 @@ def my_today(db: Session = Depends(get_db), user: Employee = Depends(get_current
                     "record_id": r.id if r else None, "status": r.status if r else "pending",
                     "note": r.note if r else "", "photo_url": photo_url(r.photo_path) if r and r.photo_path else "",
                     "file_name": r.file_name if r else "", "review": r.review if r else "",
-                    "review_note": r.review_note if r else "", "late": bool(r.late) if r else False})
+                    "review_note": r.review_note if r else "", "late": bool(r.late) if r else False,
+                    "completed_at": r.completed_at.isoformat() if r and r.completed_at else ""})
     return {"date": str(today), "items": out, "assigned_mode": any_assigned}
 
 
@@ -156,6 +157,14 @@ async def complete(template_id: int = Form(...), note: str = Form(""),
     if not rec:
         rec = SideworkRecord(employee_id=user.id, template_id=template_id, date=today)
         db.add(rec)
+    # 2026-11-18 用户定：每项任务完成前都要传照片并写备注，不分必传项。
+    # 空文件（只选了框、没选文件）按没传处理。
+    if file is not None and not (file.filename or "").strip():
+        file = None
+    if not (note or "").strip():
+        raise HTTPException(status_code=400, detail="每项都要写备注：完成前请先写一句备注")
+    if file is None and not rec.photo_path:
+        raise HTTPException(status_code=400, detail="每项都要传照片：完成前请先上传照片或视频")
     photo_path = None
     if file is not None:
         ext = os.path.splitext(file.filename or "")[1].lower()
@@ -175,8 +184,6 @@ async def complete(template_id: int = Form(...), note: str = Form(""),
                 f.write(data)
             photo_path = f"{today}/{name}"
         rec.file_name = file.filename
-    if tpl.requires_photo and not photo_path and not rec.photo_path:
-        raise HTTPException(status_code=400, detail="这项是必传项，请先传照片或视频")
     if photo_path:
         rec.photo_path = photo_path
     rec.status = "done"; rec.note = note; rec.completed_at = datetime.datetime.now()

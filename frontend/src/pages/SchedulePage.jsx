@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { createSchedule, createShiftTemplate, deleteSchedule, listEmployees, mondayOf, publishSchedule, scheduleWeek, shiftTemplates, updateSchedule } from '../api'
 import { dict, displayText } from '../i18n'
+import { roleStyle } from '../roles'
 
 export default function SchedulePage({ user, lang }) {
   const L = dict(lang).schedule
@@ -34,11 +35,22 @@ export default function SchedulePage({ user, lang }) {
     scheduleWeek(week).then(setRows).catch(() => {})
   }
   useEffect(() => { load() }, [week])
+  // Shift template id -> role, for the colored chips (shared role map).
+  const tplRole = {}
+  templates.forEach((t) => { tplRole[t.id] = t.role || 'server' })
+  const chip = (r) => (
+    <span key={r.id} className="shift-chip" style={roleStyle(tplRole[r.shift_template_id])}>
+      {displayText(r.shift, lang)}{r.status === 'draft' ? ` (${L.unpublished})` : ''}
+    </span>
+  )
 
   return (
-    <div className="card">
-      <h2>{L.title}</h2>
-      <p className="muted">{L.module}. {L.weekStarting}: {week}. {L.newDraftNote} {msg}</p>
+    <div>
+      <div className="page-head">
+        <h2>{L.title}</h2>
+        <p className="muted">{L.module}. {L.weekStarting}: {week}. {L.newDraftNote} {msg}</p>
+      </div>
+      <div className="card">
       <input type="date" value={week} onChange={(e) => setWeek(e.target.value)} />
       {user.is_manager && (
         <div className="card">
@@ -101,12 +113,12 @@ export default function SchedulePage({ user, lang }) {
                   const items = rows.filter((r) => r.employee_id === e.id && r.date === day && r.status !== 'cancelled')
                   const isEditing = user.is_manager && editCell && editCell.employeeId === e.id && editCell.date === day
                   if (!user.is_manager) {
-                    return <td key={i}>{items.map((r) => displayText(r.shift, lang)).join('、')}</td>
+                    return <td key={i}>{items.map((r) => chip(r))}</td>
                   }
                   if (!isEditing) {
                     return (
                       <td key={i} className="grid-cell" onClick={() => { setEditCell({ employeeId: e.id, date: day }); setCellAddShift(templates[0]?.id || '') }}>
-                        {items.map((r) => <div key={r.id}>{displayText(r.shift, lang)}{r.status === 'draft' ? ` (${L.unpublished})` : ''}</div>)}
+                        {items.map((r) => chip(r))}
                         {!items.length && <span className="muted">+</span>}
                       </td>
                     )
@@ -138,6 +150,12 @@ export default function SchedulePage({ user, lang }) {
             ))}
           </tbody>
         </table>
+      </div>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 12 }}>
+        {[...new Set(templates.map((t) => t.role || 'server'))].map((r) => (
+          <span key={r} className="pill" style={roleStyle(r)}>{r.charAt(0).toUpperCase() + r.slice(1)}</span>
+        ))}
+      </div>
       </div>
     </div>
   )

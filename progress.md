@@ -1,8 +1,8 @@
 # Progress — pos-sidework-app
 
 > Spec-driven context file 6 of 6. What is done, what is next, what is blocked.
-> Update this file with every change. Last updated: 2026-11-06.
-> Repo head: `7fa2d22` (2026-11-02).
+> Update this file with every change. Last updated: 2026-11-18.
+> Repo head: `35a1ec88` (2026-11-18, owner nav fix).
 
 ## Done (verified by API test + screenshot)
 
@@ -24,9 +24,46 @@
   OAuth / payments / SMS configs exist; only the core is actually built
   (see Blocked).
 
+## BrewLab-style UI redesign (2026-11-18, spec specs/brewlab-ui-redesign.md)
+- Indigo design system (#4F46E5, page #F4F5FB, white cards radius 14px,
+  soft shadow, 15px base); shared role → color map in frontend/src/roles.js
+  (Server indigo, Busser/Bar amber, Host cyan, Manager purple, Cook red,
+  Cashier green, Shift Lead purple, Dishwasher gray); desktop top bar with
+  static store name "Yardkoo", decorative search, avatar + name + role;
+  sidebar Collapse button.
+- Nav relabelled (all pages kept): employee My Schedule / My Checklists /
+  My Score; manager + owner Live Operations / Review / Schedule Builder /
+  Checklist Templates / Team & Roles / AI Assistant (Suggestions + AI Draft
+  tabs, no new route) / Report / Analytics. Owner still sees no My section.
+  Review kept in the manager nav — the BrewLab screenshots had no Review
+  page, but approving/rejecting sidework evidence has no other home.
+- Today: one checklist card per segment with progress bar; done items get
+  green check + strikethrough + "Completed at HH:MM". Every task now
+  requires a photo AND a note to complete — frontend validation + backend
+  enforcement in POST /api/sidework/complete (400 otherwise, all tasks,
+  regardless of requires_photo). GET /api/sidework/my/today also returns
+  completed_at.
+- Tasks: role tabs (All + one per role from /api/roles), rows with
+  drag-handle look (visual only), order number, role pill, segment/optional
+  tags, standard text; add-task form is now a modal. Assignment section
+  filtered by the same role tab.
+- Schedule: Excel click-to-edit grid unchanged, shifts render as
+  role-colored chips + role legend. Dashboard: stat cards from existing
+  overview data only, per-person avatar + role pill + progress bar,
+  watchlist as flagged list. Accounts: member table + name search.
+  Score: Analytics restyle, same data.
+- seed.py: idempotent ensure_roles() runs every startup, adds missing
+  "Busser" and "Bar" (plus Server/Cook/Manager/Host).
+- Verified 2026-11-18: frontend build passes; backend smoke test (16/16)
+  on SQLite — complete validation 400/400/400/200, completed_at returned,
+  roles seeded, restart keeps exactly 6 roles, dashboard 200 for
+  owner/manager and 403 for employee; Playwright screenshots 23–27.
+- App name NOT renamed (still "Schedule · Sidework" — user still deciding).
+
 ## Fix 2026-11-18 (owner nav)
 - Owner no longer sees the MY section (Schedule / Today / Score) in the sidebar or bottom nav; only the management pages (Dashboard / Review / Report / Suggestions / AI Draft / Tasks / Accounts). Manager and employee nav unchanged. Profile back button returns owner to Dashboard. (User feedback 2026-11-18: owner does not need Schedule/Today.)
-- Still open: app rename (user wants a nicer name than "Schedule · Sidework") and a UI polish pass (user: current UI is poor).
+- Still open: app rename (user wants a nicer name than "Schedule · Sidework").
+  UI polish done 2026-11-18 (BrewLab-style redesign, see above).
 
 ## Fix 2026-11-18 (Docker on Mac, login 500)
 - Login returned 500 in both PIN and username+password modes. Root cause: vite.config.js proxied /api to http://localhost:8000, but in Docker the frontend container's own localhost:8000 has nothing on it (backend is at http://backend:8000). The request never reached the backend. vite.config.js now reads VITE_PROXY_TARGET (default localhost:8000 for non-Docker dev) and docker-compose.yml sets it to http://backend:8000 for the frontend service.
