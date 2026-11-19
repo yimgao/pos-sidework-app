@@ -24,6 +24,9 @@
   OAuth / payments / SMS configs exist; only the core is actually built
   (see Blocked).
 
+## Fix 2026-11-18 (Docker on Mac, login 500)
+- Login returned 500 in both PIN and username+password modes. Root cause: vite.config.js proxied /api to http://localhost:8000, but in Docker the frontend container's own localhost:8000 has nothing on it (backend is at http://backend:8000). The request never reached the backend. vite.config.js now reads VITE_PROXY_TARGET (default localhost:8000 for non-Docker dev) and docker-compose.yml sets it to http://backend:8000 for the frontend service.
+
 ## Fix 2026-11-18 (Docker on Mac, backend exited code 1)
 - SQLAlchemy 2.1 makes postgresql:// default to the psycopg (v3) driver, but requirements install psycopg2-binary. database.py now rewrites postgresql:// to postgresql+psycopg2:// so the backend starts on Docker and on Vercel.
 
