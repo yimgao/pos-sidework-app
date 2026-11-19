@@ -97,7 +97,7 @@ export default function App() {
   return (
     <div className="layout">
       <aside className={'sidebar' + (collapsed ? ' collapsed' : '')}>
-        <div className="brand"><div className="brand-mark"><Icon name="schedule" /></div><div><b>{L.appName}</b><small>{lang === 'en' ? 'Schedule & Sidework' : '排班 · Sidework'}</small></div></div>
+        <div className="brand"><div className="brand-mark"><Icon name="schedule" /></div><div><b>{L.appName}</b><small>{lang === 'en' ? 'Restaurant operations' : '餐厅运营'}</small></div></div>
         {!user.is_owner && (<><p className="nav-label">{L.my}</p>
         <nav className="side-nav">
           {COMMON.map(([k, icon]) => (

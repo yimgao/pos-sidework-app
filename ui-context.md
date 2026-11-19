@@ -24,7 +24,7 @@
 ## Layout
 
 - **Desktop (≥ 768 px): left vertical sidebar + top bar.** Sidebar top:
-  indigo brand mark + "Schedule · Sidework". Then MY: My Schedule /
+  indigo brand mark + "StorePulse". Then MY: My Schedule /
   My Checklists / My Score (employee + manager only — owner never
   sees this section). Then MANAGER/OWNER: Live Operations / Review /
   Schedule Builder / Checklist Templates / Team & Roles / AI Assistant /

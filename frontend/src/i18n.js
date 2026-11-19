@@ -13,13 +13,13 @@ export function displayText(text, lang) {
 
 const T = {
   en: {
-    appName: 'Schedule · Sidework',
-    appSub: 'Schedule & Sidework, two independent modules',
+    appName: 'StorePulse',
+    appSub: 'Restaurant operations, at a glance',
     my: 'My', manager: 'Manager', staff: 'Staff', logout: 'Logout',
     searchPlaceholder: 'Search team, shifts…',
     nav: { schedule: 'My Schedule', today: 'My Checklists', score: 'My Score', review: 'Review', report: 'Report', dashboard: 'Live Operations', builder: 'Schedule Builder', tasks: 'Checklist Templates', accounts: 'Team & Roles', ai: 'AI Assistant', analytics: 'Analytics' },
     owner: 'Owner',
-    login: { title: 'Schedule · Sidework', enterPin: 'Enter PIN', enter: 'Enter', demo: 'Demo accounts — Owner owner / owner123 · Manager manager / manager123 · Anna anna / anna123', wrongPin: 'Wrong login', username: 'Username', password: 'Password', usePin: 'Use PIN instead', useAccount: 'Use username + password' },
+    login: { title: 'StorePulse', enterPin: 'Enter PIN', enter: 'Enter', demo: 'Demo accounts — Owner owner / owner123 · Manager manager / manager123 · Anna anna / anna123', wrongPin: 'Wrong login', username: 'Username', password: 'Password', usePin: 'Use PIN instead', useAccount: 'Use username + password' },
     loading: 'Loading…',
     schedule: {
       title: 'Weekly Schedule', module: 'Schedule module, independent', weekStarting: 'Week starting',
@@ -129,13 +129,13 @@ const T = {
     },
   },
   zh: {
-    appName: '排班 · Sidework',
-    appSub: '排班 · Sidework，两个独立模块',
+    appName: 'StorePulse',
+    appSub: '全店运营，一眼看清',
     my: '我的', manager: '经理', staff: '员工', logout: '退出',
     searchPlaceholder: '搜索员工、班次…',
     nav: { schedule: '我的排班', today: '我的清单', score: '我的分数', review: '复核', report: '报告', dashboard: '实时运营', builder: '排班表', tasks: '清单模板', accounts: '团队与岗位', ai: 'AI 助手', analytics: '数据分析' },
     owner: '老板',
-    login: { title: '排班 · Sidework', enterPin: '输入 PIN', enter: '进入', demo: '演示账号：老板 owner / owner123 · 经理 manager / manager123 · Anna anna / anna123', wrongPin: '账号或密码不对', username: '用户名', password: '密码', usePin: '改用 PIN 登录', useAccount: '改用账号密码登录' },
+    login: { title: 'StorePulse', enterPin: '输入 PIN', enter: '进入', demo: '演示账号：老板 owner / owner123 · 经理 manager / manager123 · Anna anna / anna123', wrongPin: '账号或密码不对', username: '用户名', password: '密码', usePin: '改用 PIN 登录', useAccount: '改用账号密码登录' },
     loading: '加载中…',
     schedule: {
       title: '本周排班', module: '排班模块，独立', weekStarting: '周起始',

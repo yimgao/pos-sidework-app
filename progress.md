@@ -60,6 +60,9 @@
   owner/manager and 403 for employee; Playwright screenshots 23–27.
 - App name NOT renamed (still "Schedule · Sidework" — user still deciding).
 
+## Rename 2026-11-18 (user picked StorePulse)
+- App renamed from "Schedule · Sidework" to StorePulse (user picked it from the three options). i18n appName/login title (EN+ZH), sidebar subtitle, index.html title, FastAPI title. Store name in the top bar stays "Yardkoo".
+
 ## Fix 2026-11-18 (owner nav)
 - Owner no longer sees the MY section (Schedule / Today / Score) in the sidebar or bottom nav; only the management pages (Dashboard / Review / Report / Suggestions / AI Draft / Tasks / Accounts). Manager and employee nav unchanged. Profile back button returns owner to Dashboard. (User feedback 2026-11-18: owner does not need Schedule/Today.)
 - Still open: app rename (user wants a nicer name than "Schedule · Sidework").
