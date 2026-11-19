@@ -7,6 +7,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # v2：优先读 DATABASE_URL（Docker + PostgreSQL），没配时回落到本地 SQLite。
 # 这样换数据库不用改模型代码。
 DATABASE_URL = os.environ.get("DATABASE_URL") or f"sqlite:///{os.path.join(BASE_DIR, 'app.db')}"
+# SQLAlchemy 2.1 起 postgresql:// 默认用 psycopg (v3) 驱动，但我们装的是
+# psycopg2-binary，所以这里强制用 psycopg2 驱动；否则后端启动就报
+# ModuleNotFoundError: No module named 'psycopg'（2026-11-18 Docker 实测）。
+if DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = "postgresql+psycopg2://" + DATABASE_URL[len("postgresql://"):]
 
 if DATABASE_URL.startswith("sqlite"):
     engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})

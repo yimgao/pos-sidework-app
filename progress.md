@@ -24,6 +24,9 @@
   OAuth / payments / SMS configs exist; only the core is actually built
   (see Blocked).
 
+## Fix 2026-11-18 (Docker on Mac, backend exited code 1)
+- SQLAlchemy 2.1 makes postgresql:// default to the psycopg (v3) driver, but requirements install psycopg2-binary. database.py now rewrites postgresql:// to postgresql+psycopg2:// so the backend starts on Docker and on Vercel.
+
 ## Owner / Manager / Employee v2 (2026-11-18, spec specs/owner-manager-employee-v2.md)
 - Three user types (owner > manager > employee); username+password login (PIN fallback kept); owner creates any account, manager only employees; owner settings toggle for manager visibility of per-person AI reports.
 - Configurable roles (manager adds in app), tasks carry standard + segment (opening/midday/evening, midday optional) + role; Today groups by segment and shows the standard.
