@@ -2,7 +2,7 @@
 
 > Spec-driven context file 6 of 6. What is done, what is next, what is blocked.
 > Update this file with every change. Last updated: 2026-11-18.
-> Repo head: `625ae24f` (2026-11-18, Yardkoo theme + standard/multi photos + delete user + notifications + split login + responsive).
+> Repo head: `536f12fb` (2026-11-19, owner 账号不能停用 + 启动自愈).
 
 ## Done (verified by API test + screenshot)
 
