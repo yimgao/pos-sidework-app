@@ -24,7 +24,11 @@
   OAuth / payments / SMS configs exist; only the core is actually built
   (see Blocked).
 
-## Yardkoo theme + standard/multi photos + delete user + notifications + split login + responsive (2026-11-18, spec specs/yardkoo-theme-and-task-photos.md)
+## Owner 账号不能停用 + 启动自愈 (2026-11-18 晚，用户亲口：owner 账号被停用了，这个操作不可以有)
+- **经过：** 用户在 Team & Roles 里把 owner 账号停用了，owner 登不上。之前只禁了删 owner，没禁停用 owner——这是个缺口。
+- **修复：** `PATCH /api/accounts` 停用 owner 直接 403（"Owner 账号不能停用"）；停用自己的账号也 403（防止把自己锁在外面）。Team & Roles 里 owner 行和自己的行不再显示停用按钮，改显示 "Owner 账号不能停用"。员工停用/启用不变。
+- **恢复已停用的 owner：** `seed()` 启动时新增 `ensure_active_owner()`——若没有任何 active owner，就把所有 owner 账号重新激活（只动 owner，不碰员工/经理的停用状态）。用户 Mac 上 `git pull` 后重启容器，owner 自动恢复、直接能登。
+- **验证：** scratch DB 10/10 通过（停用 owner 403、经理停用自己 403、停用 Anna 200 且登录 401、重新启用后登录 200）；另测启动自愈：库里 owner 置 0 后重启，owner 恢复 1 且登录 200，Anna 状态不受影响。前端 build 通过。
 - **Inactive/login bug — root cause found:** only `PATCH /api/accounts` writes `is_active=False`; seed never sets it, default is True, no startup/migration path deactivates anyone. The demo staff were deactivated by tapping Deactivate while testing — not a code bug. Fix is UX: confirm before deactivating ("停用后该员工无法登录，确定停用？"), Inactive rows dimmed with amber pill, Activate stays prominent. No silent re-activation job added (would undo a deliberate manager decision). Verified on a fresh scratch DB: seeded staff active, anna/anna123 login 200.
 - **Tasks list:** row numbers are now the display index in the filtered list (never `sort_order`); backend `sort_order` = max in group + 1 (deactivated tasks no longer cause duplicates); blank title rejected (400). The "1"-titled row was user test data, not deleted.
 - **Standard photo + multi-photo:** `SideworkTemplate.standard_photo_path` + new `SideworkPhoto` table; `POST /api/sidework/templates/{id}/standard-photo` (manager); `POST /api/sidework/complete` takes multiple `files`; `POST /api/sidework/records/{id}/photos` adds photos to an existing record; `GET /api/sidework/my/today` returns `standard_photo_url` + `photos[]`. Today item: standard photo on top → standard text → your photos (multi, thumbnails) → notes → big ☑️ button. Photo + note still enforced (400 otherwise). No standard content invented — empty until the manager uploads.

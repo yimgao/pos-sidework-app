@@ -76,6 +76,14 @@ def update_account(account_id: int, body: AccountPatch, db: Session = Depends(ge
     if body.role:
         e.role = body.role
     if body.is_active is not None:
+        if body.is_active is False:
+            # 2026-11-18 晚：用户把 owner 账号停用了才发现 owner 根本不能被停用
+            # （停了就没人能管账号）。owner 账号永远不能停用；自己的账号也不能
+            # 停用（否则把自己锁在外面，没人能恢复）。
+            if e.is_owner:
+                raise HTTPException(status_code=403, detail="Owner 账号不能停用")
+            if e.id == user.id:
+                raise HTTPException(status_code=403, detail="不能停用自己的账号")
         e.is_active = body.is_active
     db.commit(); db.refresh(e)
     return _out(e)

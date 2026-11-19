@@ -52,10 +52,14 @@ export default function AccountsPage({ user, lang }) {
                 </td>
                 <td>{a.is_owner ? 'Owner' : a.is_manager ? 'Manager' : 'Staff'}</td>
                 <td style={{ whiteSpace: 'nowrap' }}>
+                  {a.is_owner || a.id === user.id ? (
+                    <span className="muted" style={{ fontSize: 12 }}>{L.ownerLocked}</span>
+                  ) : (
                   <button className="btn2" onClick={async () => {
                     if (a.is_active && !window.confirm(L.deactivateConfirm.replace('{name}', a.name))) return
                     await updateAccount(a.id, { is_active: !a.is_active }); load()
                   }}>{a.is_active ? L.deactivate : L.activate}</button>
+                  )}
                   <button className="btn2" style={{ color: '#DC2626' }} onClick={async () => {
                     if (!window.confirm(L.deleteConfirm.replace('{name}', a.name))) return
                     try { await deleteAccount(a.id); load() } catch (e) { setMsg(e.message) }

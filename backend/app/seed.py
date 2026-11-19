@@ -33,12 +33,26 @@ def ensure_roles(db: Session):
     db.commit()
 
 
+def ensure_active_owner(db: Session):
+    """安全底线：系统至少要有一个能登录的 owner。每次启动都检查——
+    2026-11-18 晚 owner 账号曾被误停用（当时停用 owner 还没被禁掉），
+    修复后 PATCH 已禁停用 owner，但已经停用的 owner 必须能恢复：
+    若没有任何 active owner，就把所有 owner 账号重新激活。
+    只动 owner，不碰员工/经理的停用状态。"""
+    owners = db.query(Employee).filter(Employee.is_owner == True).all()  # noqa: E712
+    if owners and not any(o.is_active for o in owners):
+        for o in owners:
+            o.is_active = True
+        db.commit()
+
+
 def seed():
     Base.metadata.create_all(bind=engine)
     ensure_new_columns()
     db: Session = SessionLocal()
     try:
         ensure_roles(db)
+        ensure_active_owner(db)
         if db.query(Employee).count():
             return
         owner = Employee(name="Owner", role="owner", pin_hash=hash_pin("000000"), username="owner",
