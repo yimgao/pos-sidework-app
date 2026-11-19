@@ -24,6 +24,10 @@
   OAuth / payments / SMS configs exist; only the core is actually built
   (see Blocked).
 
+## Fix 2026-11-18 (owner nav)
+- Owner no longer sees the MY section (Schedule / Today / Score) in the sidebar or bottom nav; only the management pages (Dashboard / Review / Report / Suggestions / AI Draft / Tasks / Accounts). Manager and employee nav unchanged. Profile back button returns owner to Dashboard. (User feedback 2026-11-18: owner does not need Schedule/Today.)
+- Still open: app rename (user wants a nicer name than "Schedule · Sidework") and a UI polish pass (user: current UI is poor).
+
 ## Fix 2026-11-18 (Docker on Mac, login 500)
 - Login returned 500 in both PIN and username+password modes. Root cause: vite.config.js proxied /api to http://localhost:8000, but in Docker the frontend container's own localhost:8000 has nothing on it (backend is at http://backend:8000). The request never reached the backend. vite.config.js now reads VITE_PROXY_TARGET (default localhost:8000 for non-Docker dev) and docker-compose.yml sets it to http://backend:8000 for the frontend service.
 

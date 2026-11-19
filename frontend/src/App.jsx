@@ -77,21 +77,21 @@ export default function App() {
       </main>
     )
   }
-  const tabs = user.is_manager ? [...COMMON, ...MANAGER] : COMMON
+  const tabs = user.is_owner ? MANAGER : user.is_manager ? [...COMMON, ...MANAGER] : COMMON
   const logout = () => { clearToken(); setUser(null) }
   return (
     <div className="layout">
       <aside className="sidebar">
         <div className="brand"><div className="brand-mark"><Icon name="schedule" /></div><div><b>{L.appName}</b><small>{lang === 'en' ? 'Schedule & Sidework' : '排班 · Sidework'}</small></div></div>
-        <p className="nav-label">{L.my}</p>
+        {!user.is_owner && (<><p className="nav-label">{L.my}</p>
         <nav className="side-nav">
           {COMMON.map(([k, icon]) => (
             <button key={k} className={tab === k ? 'active' : ''} onClick={() => setTab(k)}>
               <Icon name={icon} /><span><b>{L.nav[k]}</b></span>
             </button>
           ))}
-        </nav>
-        {user.is_manager && (<><p className="nav-label">{L.manager}</p><nav className="side-nav">
+        </nav></>)}
+        {user.is_manager && (<><p className="nav-label">{user.is_owner ? L.owner : L.manager}</p><nav className="side-nav">
           {MANAGER.map(([k, icon]) => (
             <button key={k} className={tab === k ? 'active' : ''} onClick={() => setTab(k)}>
               <Icon name={icon} /><span><b>{L.nav[k]}</b></span>
@@ -116,7 +116,7 @@ export default function App() {
           {tab === 'tasks' && user.is_manager && <TasksPage lang={lang} />}
           {tab === 'dashboard' && user.is_manager && <DashboardPage user={user} lang={lang} />}
           {tab === 'accounts' && user.is_manager && <AccountsPage user={user} lang={lang} />}
-          {tab === 'profile' && <ProfilePage user={user} lang={lang} onLang={changeLang} onLogout={logout} onBack={() => setTab(user.is_manager ? 'schedule' : 'today')} />}
+          {tab === 'profile' && <ProfilePage user={user} lang={lang} onLang={changeLang} onLogout={logout} onBack={() => setTab(user.is_owner ? 'dashboard' : user.is_manager ? 'schedule' : 'today')} />}
         </main>
         <nav className="bottom-nav">
           {tabs.map(([k, icon]) => (
