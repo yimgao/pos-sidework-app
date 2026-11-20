@@ -1,8 +1,36 @@
 # Progress — pos-sidework-app
 
 > Spec-driven context file 6 of 6. What is done, what is next, what is blocked.
-> Update this file with every change. Last updated: 2026-11-18.
-> Repo head: `536f12fb` (2026-11-19, owner 账号不能停用 + 启动自愈).
+> Update this file with every change. Last updated: 2026-11-20.
+> Repo head: `8592abe`; responsive UI work below is uncommitted, not pushed.
+
+## Responsive workspaces (2026-11-20)
+- Approved scope: `specs/responsive-workspaces.md`. Phone role-specific bottom
+  tabs and More directory; compact tablet rail; full/collapsible desktop sidebar.
+- Schedule: phone daily list, tablet day/week toggle, desktop week grid;
+  retained custom shifts, drafts, editing, cancellation and explicit publishing.
+- Accounts/score tables become labelled phone rows; account search remains visible.
+  Dashboard prioritizes review/exceptions; workspace widths vary by task.
+- Touch sizing, safe areas, visible focus and constrained mobile task modal;
+  modal traps Tab, restores focus and supports Escape. EN/ZH navigation labels.
+- Verified `npm run build` (47 modules) and `git diff --check`.
+- Playwright: 304 rendered page checks across Owner/Manager/Anna, EN/ZH and
+  widths 375, 390, 540, 768, 834, 1024, 1280, 1440; no page-level overflow
+  or browser JavaScript errors. Screenshots visually inspected for phone,
+  tablet and desktop. Tests wait for loaded content, not merely loading screens.
+- Real local API/UI flow verified: custom shift → draft → publish → employee
+  visibility → edit → cancel → employee removal. All mutations used isolated
+  `/tmp/pos-responsive-verification.db`, not the project's normal database.
+- Modal verified at 390×844, reduced-height 390×480, 834×1194, 1440×1000;
+  16px inputs, viewport bounds, Tab trap and Escape. Physical iOS keyboard/
+  Safari behavior has NOT been verified; reduced viewport is only an approximation.
+- Reusable checks: `scripts/verify_responsive.py`, `scripts/verify_responsive_flow.py`
+  (requires `POS_ISOLATED_TEST_DB=1`), `scripts/verify_responsive_modal.py`.
+  They require a running demo frontend on port 5173, seeded backend on port 8000,
+  and Python Playwright with Chromium (installed in `/tmp/pos-responsive-venv`).
+- Screenshots/results: `/tmp/pos-responsive-artifacts/` (temporary local files).
+  Backend business logic and repository dependencies unchanged; pre-existing
+  context-document relocation left intact. No commit or push performed.
 
 ## Done (verified by API test + screenshot)
 

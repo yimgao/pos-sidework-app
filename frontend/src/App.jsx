@@ -30,7 +30,7 @@ function Icon({ name }) {
     collapse: <><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M15 3v18M10 8l-2 2 2 2" /></>,
     bell: <><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.7 21a2 2 0 0 1-3.4 0" /></>,
   }
-  return <svg {...p}>{paths[name]}</svg>
+  return <svg {...p} aria-hidden="true">{name === 'more' ? <><circle cx="5" cy="12" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /></> : paths[name]}</svg>
 }
 
 // Notifications bell: real items only (GET /api/notifications). Read state
@@ -79,8 +79,8 @@ function Bell({ lang }) {
 
 // Employee "My" pages. Manager keeps them too; owner never sees them.
 const COMMON = [
-  ['schedule', 'schedule'],
   ['today', 'check'],
+  ['schedule', 'schedule'],
   ['score', 'chart'],
 ]
 // Manager + owner pages. 'builder' and 'analytics' are separate tab keys
@@ -111,7 +111,17 @@ export default function App() {
   const [lang, setLangState] = useState(getLang())
   const changeLang = (l) => { setLang(l); setLangState(l) }
   const L = dict(lang)
-  useEffect(() => { if (localStorage.getItem('pos-token')) me().then(setUser).catch(() => clearToken()) }, [])
+  useEffect(() => {
+    if (localStorage.getItem('pos-token')) me().then((current) => {
+      setUser(current)
+      setTab(current.is_manager ? 'dashboard' : 'today')
+    }).catch(() => clearToken())
+  }, [])
+  const navigate = (next) => {
+    setTab(next)
+    window.scrollTo({ top: 0, behavior: 'instant' })
+    requestAnimationFrame(() => document.getElementById('workspace')?.focus({ preventScroll: true }))
+  }
   if (!user) {
     const submit = async (u, p) => {
       try {
@@ -164,10 +174,15 @@ export default function App() {
     )
   }
   const tabs = user.is_owner ? MANAGER : user.is_manager ? [...COMMON, ...MANAGER] : COMMON
+  const primary = user.is_manager ? [['dashboard', 'grid'], ['builder', 'schedule'], ['review', 'review'], ['more', 'more']] : COMMON
+  const compactLabel = (key) => L.responsive[{ dashboard: 'overview', builder: 'schedule' }[key] || key] || L.nav[key]
+  const isMore = tab === 'more' || (!primary.some(([key]) => key === tab) && tab !== 'profile')
+  const wide = ['dashboard', 'builder', 'accounts', 'analytics', 'tasks', 'review'].includes(tab)
   const logout = () => { clearToken(); setUser(null) }
   const roleText = user.is_owner ? L.owner : user.is_manager ? L.manager : roleLabel(user.role, L.staff)
   return (
     <div className="layout">
+      <a className="skip-link" href="#workspace">{L.responsive.skip}</a>
       <aside className={'sidebar' + (collapsed ? ' collapsed' : '')}>
         <div className="brand">
           <img className="brand-logo" src="/yardkoo-logo.svg" alt="Yardkoo Seafood & Grill" />
@@ -177,39 +192,43 @@ export default function App() {
         {!user.is_owner && (<><p className="nav-label">{L.my}</p>
         <nav className="side-nav">
           {COMMON.map(([k, icon]) => (
-            <button key={k} className={tab === k ? 'active' : ''} onClick={() => setTab(k)}>
+            <button key={k} title={L.nav[k]} aria-current={tab === k ? 'page' : undefined} className={tab === k ? 'active' : ''} onClick={() => navigate(k)}>
               <Icon name={icon} /><span><b>{L.nav[k]}</b></span>
             </button>
           ))}
         </nav></>)}
         {user.is_manager && (<><p className="nav-label">{user.is_owner ? L.owner : L.manager}</p><nav className="side-nav">
           {MANAGER.map(([k, icon]) => (
-            <button key={k} className={tab === k ? 'active' : ''} onClick={() => setTab(k)}>
+            <button key={k} title={L.nav[k]} aria-current={tab === k ? 'page' : undefined} className={tab === k ? 'active' : ''} onClick={() => navigate(k)}>
               <Icon name={icon} /><span><b>{L.nav[k]}</b></span>
             </button>
           ))}
         </nav></>)}
-        <button className="collapse-btn" onClick={() => setCollapsed(!collapsed)}>
-          <Icon name="collapse" /><span>{collapsed ? '›' : '‹ Collapse'}</span>
+        <button className="collapse-btn" aria-label={collapsed ? L.responsive.expand : L.responsive.collapse} aria-expanded={!collapsed} onClick={() => setCollapsed(!collapsed)}>
+          <Icon name="collapse" /><span>{L.responsive.collapse}</span>
         </button>
-        <button className="user-card" onClick={() => setTab('profile')}>
+        <button className="user-card" aria-label={L.profile.title} onClick={() => navigate('profile')}>
           <div className="avatar" style={{ background: roleAvatarColor(user.role), color: '#fff' }}>{initials(user.name)}</div>
           <div className="user-meta"><b>{user.name}</b><small>{roleText} · {L.profile.title} ›</small></div>
         </button>
       </aside>
       <div className="maincol">
-        <header className="mobile-header"><b>{L.appName}</b><div style={{ display: 'flex', gap: 8, alignItems: 'center' }}><Bell lang={lang} /><button className="avatar-btn" onClick={() => setTab('profile')}>{user.name.slice(0, 1)}</button></div></header>
+        <header className="mobile-header"><img src="/yardkoo-logo.svg" alt="Yardkoo" /><div className="header-actions"><Bell lang={lang} /><button className="avatar-btn" aria-label={L.profile.title} onClick={() => navigate('profile')}>{initials(user.name)}</button></div></header>
         <header className="topbar">
-          <div className="topbar-store">Yardkoo</div>
-          {/* Decorative for now: no search backend yet, do not wire it to anything. */}
-          <input className="topbar-search" placeholder={L.searchPlaceholder} />
+          <div className="topbar-store">{tab === 'profile' ? L.profile.title : tab === 'more' ? L.responsive.more : L.nav[tab]}</div>
           <Bell lang={lang} />
-          <button className="topbar-user" onClick={() => setTab('profile')}>
+          <button className="topbar-user" aria-label={L.profile.title} onClick={() => navigate('profile')}>
             <div className="avatar" style={{ background: roleAvatarColor(user.role), color: '#fff' }}>{initials(user.name)}</div>
             <div className="user-meta"><b>{user.name}</b><small>{roleText}</small></div>
           </button>
         </header>
-        <main>
+        <main id="workspace" tabIndex={-1} className={wide ? 'workspace-wide' : 'workspace-focused'}>
+          {tab === 'more' && <>
+            <div className="page-head"><h2>{L.responsive.more}</h2><p className="muted">{roleText}</p></div>
+            <nav className="nav-directory" aria-label={L.responsive.navigation}>
+              {tabs.map(([key, icon]) => <button key={key} onClick={() => navigate(key)}><Icon name={icon} /><span>{L.nav[key]}</span><span aria-hidden="true">›</span></button>)}
+            </nav>
+          </>}
           {(tab === 'schedule' || tab === 'builder') && <SchedulePage user={user} lang={lang} />}
           {tab === 'today' && <TodayPage user={user} lang={lang} />}
           {(tab === 'score' || tab === 'analytics') && <ScorePage user={user} lang={lang} />}
@@ -217,14 +236,14 @@ export default function App() {
           {tab === 'report' && user.is_manager && <ReportPage lang={lang} />}
           {tab === 'ai' && user.is_manager && <AiAssistantPage lang={lang} />}
           {tab === 'tasks' && user.is_manager && <TasksPage lang={lang} />}
-          {tab === 'dashboard' && user.is_manager && <DashboardPage user={user} lang={lang} />}
+          {tab === 'dashboard' && user.is_manager && <DashboardPage user={user} lang={lang} onNavigate={navigate} />}
           {tab === 'accounts' && user.is_manager && <AccountsPage user={user} lang={lang} />}
-          {tab === 'profile' && <ProfilePage user={user} lang={lang} onLang={changeLang} onLogout={logout} onBack={() => setTab(user.is_manager ? 'dashboard' : 'today')} />}
+          {tab === 'profile' && <ProfilePage user={user} lang={lang} onLang={changeLang} onLogout={logout} onBack={() => navigate(user.is_manager ? 'dashboard' : 'today')} />}
         </main>
-        <nav className="bottom-nav">
-          {tabs.map(([k, icon]) => (
-            <button key={k} className={tab === k ? 'active' : ''} onClick={() => setTab(k)}>
-              <Icon name={icon} /><span>{L.nav[k]}</span>
+        <nav className="bottom-nav" aria-label={L.responsive.navigation}>
+          {primary.map(([k, icon]) => (
+            <button key={k} aria-current={(k === 'more' ? isMore : tab === k) ? 'page' : undefined} className={(k === 'more' ? isMore : tab === k) ? 'active' : ''} onClick={() => navigate(k)}>
+              <Icon name={icon} /><span>{compactLabel(k)}</span>
             </button>
           ))}
         </nav>

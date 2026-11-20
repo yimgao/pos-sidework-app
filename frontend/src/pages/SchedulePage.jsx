@@ -1,162 +1,204 @@
-import { useEffect, useState } from 'react'
-import { createSchedule, createShiftTemplate, deleteSchedule, listEmployees, mondayOf, publishSchedule, scheduleWeek, shiftTemplates, updateSchedule } from '../api'
+import { useEffect, useRef, useState } from 'react'
+import { createSchedule, createShiftTemplate, deleteSchedule, listEmployees, publishSchedule, scheduleWeek, shiftTemplates, updateSchedule } from '../api'
 import { dict, displayText } from '../i18n'
 import { roleStyle } from '../roles'
+import './schedule.css'
+
+// Calendar dates are local civil dates, never UTC timestamps (including DST weeks).
+function dateKey(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+}
+function calendarDate(key) {
+  const [year, month, day] = key.split('-').map(Number)
+  return new Date(year, month - 1, day, 12)
+}
+function offsetDate(key, offset) {
+  const date = calendarDate(key)
+  date.setDate(date.getDate() + offset)
+  return dateKey(date)
+}
+function weekOf(key) {
+  return offsetDate(key, -((calendarDate(key).getDay() + 6) % 7))
+}
 
 export default function SchedulePage({ user, lang }) {
-  const L = dict(lang).schedule
+  const T = dict(lang)
+  const L = T.schedule
+  const R = T.responsive
+  const today = dateKey(new Date())
   const [rows, setRows] = useState([])
   const [employees, setEmployees] = useState([])
   const [templates, setTemplates] = useState([])
-  const [week, setWeek] = useState(mondayOf())
+  const [week, setWeek] = useState(() => weekOf(today))
+  const [selectedDate, setSelectedDate] = useState(today)
+  const [phone, setPhone] = useState(() => window.matchMedia('(max-width: 767px)').matches)
+  const [preferredView, setPreferredView] = useState('week')
+  const view = phone ? 'day' : preferredView
   const [newEmp, setNewEmp] = useState('')
   const [newShift, setNewShift] = useState('')
-  const [newDate, setNewDate] = useState(mondayOf())
+  const [newDate, setNewDate] = useState(today)
   const [msg, setMsg] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [revision, setRevision] = useState(0)
   const [shiftNameEn, setShiftNameEn] = useState('')
   const [shiftNameZh, setShiftNameZh] = useState('')
   const [shiftStart, setShiftStart] = useState('14:00')
   const [shiftEnd, setShiftEnd] = useState('closing')
   const [shiftEndTime, setShiftEndTime] = useState('22:00')
-  // 班次只显示名字，不带时间段；自定义时间由经理在下面的自定义班次里另选。
-  // Excel 式格子编辑：点格子进入编辑态，改班次、删班次、加班次都在格子里完成。
-  const [editCell, setEditCell] = useState(null) // {employeeId, date}
+  const [editCell, setEditCell] = useState(null)
   const [cellAddShift, setCellAddShift] = useState('')
+  const editTrigger = useRef(null)
+  const editorRef = useRef(null)
+  const mutationLock = useRef(false)
+  const locale = lang === 'zh' ? 'zh-CN' : 'en-US'
+  const formatDate = (key, options) => calendarDate(key).toLocaleDateString(locale, options)
+  const days = Array.from({ length: 7 }, (_, index) => offsetDate(week, index))
+  const staff = user.is_manager ? employees.filter((employee) => !employee.is_manager) : [user]
 
-  const load = () => {
-    listEmployees().then((list) => {
-      setEmployees(list)
-      if (!newEmp && list.filter((e) => !e.is_manager)[0]) setNewEmp(list.filter((e) => !e.is_manager)[0].id)
-    }).catch(() => {})
-    shiftTemplates().then((list) => {
-      setTemplates(list)
-      if (!newShift && list[0]) setNewShift(list[0].id)
-    }).catch(() => {})
-    scheduleWeek(week).then(setRows).catch(() => {})
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 767px)')
+    const resize = () => setPhone(media.matches)
+    media.addEventListener('change', resize)
+    return () => media.removeEventListener('change', resize)
+  }, [])
+
+  useEffect(() => {
+    let active = true
+    setLoading(true)
+    // Employees do not need the team directory to read their own schedule.
+    Promise.all([user.is_manager ? listEmployees() : Promise.resolve([]), shiftTemplates(), scheduleWeek(week)])
+      .then(([people, shifts, schedules]) => {
+        if (!active) return
+        setEmployees(people)
+        setTemplates(shifts)
+        setRows(schedules)
+        setNewEmp((value) => value || people.find((employee) => !employee.is_manager)?.id || '')
+        setNewShift((value) => value || shifts[0]?.id || '')
+      })
+      .catch((error) => { if (active) { setRows([]); setMsg(error.message) } })
+      .finally(() => { if (active) setLoading(false) })
+    return () => { active = false }
+  }, [week, revision, user.id, user.is_manager])
+
+  useEffect(() => {
+    if (editCell && !loading) editorRef.current?.querySelector('select, button')?.focus()
+    else if (!editCell && editTrigger.current) {
+      document.getElementById(editTrigger.current)?.focus()
+      editTrigger.current = null
+    }
+  }, [editCell, loading, view])
+
+  const mutate = async (action, message) => {
+    if (mutationLock.current) return
+    mutationLock.current = true
+    setBusy(true)
+    setMsg('')
+    try {
+      const result = await action()
+      if (message) setMsg(typeof message === 'function' ? message(result) : message)
+      setRevision((value) => value + 1)
+    } catch (error) { setMsg(error.message) }
+    finally { mutationLock.current = false; setBusy(false) }
   }
-  useEffect(() => { load() }, [week])
-  // Shift template id -> role, for the colored chips (shared role map).
-  const tplRole = {}
-  templates.forEach((t) => { tplRole[t.id] = t.role || 'server' })
-  const chip = (r) => (
-    <span key={r.id} className="shift-chip" style={roleStyle(tplRole[r.shift_template_id])}>
-      {displayText(r.shift, lang)}{r.status === 'draft' ? ` (${L.unpublished})` : ''}
-    </span>
-  )
-
-  return (
-    <div>
-      <div className="page-head">
-        <h2>{L.title}</h2>
-        <p className="muted">{L.module}. {L.weekStarting}: {week}. {L.newDraftNote} {msg}</p>
-      </div>
-      <div className="card">
-      <input type="date" value={week} onChange={(e) => setWeek(e.target.value)} />
-      {user.is_manager && (
-        <div className="card">
-          <h3>{L.addTitle}</h3>
-          <select value={newEmp} onChange={(e) => setNewEmp(e.target.value)}>
-            {employees.filter((e) => !e.is_manager).map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
-          </select>
-          <select value={newShift} onChange={(e) => setNewShift(e.target.value)}>
-            {templates.map((t) => <option key={t.id} value={t.id}>{displayText(t.name, lang)}</option>)}
-          </select>
-          <input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} />
-          <button className="btn" onClick={async () => {
-            try { await createSchedule({ employee_id: Number(newEmp), shift_template_id: Number(newShift), date: newDate }); setMsg(lang === 'zh' ? '已新增，未发布。' : 'Added as draft.'); load() }
-            catch (e) { setMsg(e.message) }
-          }}>{L.add}</button>
-          <button className="btn" onClick={async () => {
-            try { const r = await publishSchedule(week); setMsg(lang === 'zh' ? `已发布 ${r.published} 条。` : `Published ${r.published} shifts.`); load() }
-            catch (e) { setMsg(e.message) }
-          }}>{L.publish}</button>
+  const chooseDate = (date) => {
+    if (!date) return
+    setWeek(weekOf(date))
+    setSelectedDate(date)
+    setNewDate(date)
+    setEditCell(null)
+  }
+  const itemsFor = (employeeId, date) => rows.filter((row) => row.employee_id === employeeId && row.date === date && row.status !== 'cancelled' && (user.is_manager || row.status === 'published'))
+  const options = templates.map((template) => <option key={template.id} value={template.id}>{displayText(template.name, lang)}</option>)
+  const chip = (row) => <span key={row.id} className="shift-chip" style={roleStyle(templates.find((template) => template.id === row.shift_template_id)?.role)}>{displayText(row.shift, lang)}{row.status === 'draft' && <small> ({L.unpublished})</small>}</span>
+  const closeEditor = () => {
+    setEditCell(null)
+  }
+  const personCell = (employee, date) => {
+    const items = itemsFor(employee.id, date)
+    const editing = user.is_manager && editCell?.employeeId === employee.id && editCell.date === date
+    const label = `${employee.name}, ${formatDate(date, { month: 'short', day: 'numeric' })}`
+    if (editing) return (
+      <div ref={editorRef} className="schedule-editor" onKeyDown={(event) => { if (event.key === 'Escape') closeEditor() }}>
+        {items.map((row) => <div className="schedule-editor-row" key={row.id}>
+          <select aria-label={`${R.edit}: ${label}, ${displayText(row.shift, lang)}`} value={row.shift_template_id} disabled={busy || loading} onChange={(event) => mutate(() => updateSchedule(row.id, { shift_template_id: Number(event.target.value) }))}>{options}</select>
+          <button type="button" className="btn2 schedule-cancel" disabled={busy || loading} aria-label={`${R.cancelShift}: ${label}, ${displayText(row.shift, lang)}`} onClick={() => mutate(() => deleteSchedule(row.id))}>×</button>
+        </div>)}
+        <div className="schedule-editor-row">
+          <select aria-label={`${L.add}: ${label}`} value={cellAddShift} onChange={(event) => setCellAddShift(event.target.value)}>{options}</select>
+          <button type="button" className="btn2" disabled={busy || loading || !cellAddShift} aria-label={`${L.add}: ${label}`} onClick={() => mutate(() => createSchedule({ employee_id: employee.id, shift_template_id: Number(cellAddShift), date }), R.draftAdded)}>+</button>
         </div>
-      )}
-      {user.is_manager && (
-        <div className="card">
-          <h3>{L.customTitle}</h3>
-          <input placeholder={L.customNameEn} value={shiftNameEn} onChange={(e) => setShiftNameEn(e.target.value)} />
-          <input placeholder={L.customNameZh} value={shiftNameZh} onChange={(e) => setShiftNameZh(e.target.value)} />
-          <label>{L.startTime} <input type="time" value={shiftStart} onChange={(e) => setShiftStart(e.target.value)} /></label>
-          <select value={shiftEnd} onChange={(e) => setShiftEnd(e.target.value)}>
-            <option value="closing">{L.toClosing}</option>
-            <option value="time">{L.endTime}</option>
-          </select>
-          {shiftEnd === 'time' && <input type="time" value={shiftEndTime} onChange={(e) => setShiftEndTime(e.target.value)} />}
-          <button className="btn" onClick={async () => {
-            try {
-              const nameEn = shiftNameEn.trim() || 'Custom shift'
-              await createShiftTemplate({ name_en: nameEn, name_zh: shiftNameZh, start_time: shiftStart, end_time: shiftEnd === 'closing' ? 'closing' : shiftEndTime })
-              setShiftNameEn(''); setShiftNameZh(''); setMsg(lang === 'zh' ? '班次已新增，可在上面排班下拉里选。' : 'Shift added, pick it in the schedule dropdown above.'); load()
-            } catch (e) { setMsg(e.message) }
-          }}>{L.addShift}</button>
-          <p className="muted">{L.quick}</p>
-          <div>
-            {['14:00', '15:00', '16:00'].map((s) => (
-              <button key={s} className="btn2" onClick={async () => {
-                try { await createShiftTemplate({ name_en: `${s}–Closing`, name_zh: `${s}到关门`, start_time: s, end_time: 'closing' }); load() } catch (e) { setMsg(e.message) }
-              }}>{s}–{lang === 'zh' ? '关门' : 'Closing'}</button>
-            ))}
-          </div>
-        </div>
-      )}
-      {user.is_manager && <p className="muted">{L.clickToEdit}</p>}
-      <div style={{ overflowX: 'auto' }}>
-        <table className="schedule-grid">
-          <thead><tr><th>{L.employee}</th>{L.days.map((d) => <th key={d}>{d}</th>)}</tr></thead>
-          <tbody>
-            {employees.filter((e) => !e.is_manager).map((e) => (
-              <tr key={e.id}><td><b>{e.name}</b></td>
-                {L.days.map((_, i) => {
-                  const d = new Date(week); d.setDate(d.getDate() + i)
-                  const day = d.toISOString().slice(0, 10)
-                  const items = rows.filter((r) => r.employee_id === e.id && r.date === day && r.status !== 'cancelled')
-                  const isEditing = user.is_manager && editCell && editCell.employeeId === e.id && editCell.date === day
-                  if (!user.is_manager) {
-                    return <td key={i}>{items.map((r) => chip(r))}</td>
-                  }
-                  if (!isEditing) {
-                    return (
-                      <td key={i} className="grid-cell" onClick={() => { setEditCell({ employeeId: e.id, date: day }); setCellAddShift(templates[0]?.id || '') }}>
-                        {items.map((r) => chip(r))}
-                        {!items.length && <span className="muted">+</span>}
-                      </td>
-                    )
-                  }
-                  return (
-                    <td key={i} className="grid-cell editing">
-                      {items.map((r) => (
-                        <div key={r.id} style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
-                          <select value={r.shift_template_id} onChange={async (ev) => { try { await updateSchedule(r.id, { shift_template_id: Number(ev.target.value) }); load() } catch (err) { setMsg(err.message) } }}>
-                            {templates.map((t) => <option key={t.id} value={t.id}>{displayText(t.name, lang)}</option>)}
-                          </select>
-                          <button className="btn2" onClick={async () => { try { await deleteSchedule(r.id); load() } catch (err) { setMsg(err.message) } }}>×</button>
-                        </div>
-                      ))}
-                      <div style={{ display: 'flex', gap: 4 }}>
-                        <select value={cellAddShift} onChange={(ev) => setCellAddShift(ev.target.value)}>
-                          {templates.map((t) => <option key={t.id} value={t.id}>{displayText(t.name, lang)}</option>)}
-                        </select>
-                        <button className="btn2" onClick={async () => {
-                          try { await createSchedule({ employee_id: e.id, shift_template_id: Number(cellAddShift || templates[0]?.id), date: day }); load() }
-                          catch (err) { setMsg(err.message) }
-                        }}>+</button>
-                      </div>
-                      <button className="btn2" onClick={() => setEditCell(null)}>{L.done}</button>
-                    </td>
-                  )
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <button type="button" className="btn2" onClick={closeEditor}>{L.done}</button>
       </div>
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 12 }}>
-        {[...new Set(templates.map((t) => t.role || 'server'))].map((r) => (
-          <span key={r} className="pill" style={roleStyle(r)}>{r.charAt(0).toUpperCase() + r.slice(1)}</span>
-        ))}
-      </div>
-      </div>
+    )
+    return <div className="schedule-cell-content">
+      <div className="schedule-chips">{items.length ? items.map(chip) : <span className="muted">{R.noShifts}</span>}</div>
+      {user.is_manager && <button type="button" id={`schedule-edit-${employee.id}-${date}`} className="schedule-edit" aria-label={`${items.length ? R.edit : L.add}: ${label}`} onClick={(event) => {
+        editTrigger.current = event.currentTarget.id
+        setEditCell({ employeeId: employee.id, date })
+        setCellAddShift(templates[0]?.id || '')
+      }}>{items.length ? R.edit : '+'}</button>}
     </div>
-  )
+  }
+
+  return <div className="schedule-workspace">
+    <div className="page-head">
+      <h2>{R.schedule}</h2>
+      {user.is_manager && <p className="muted">{L.newDraftNote}</p>}
+    </div>
+    <section className="schedule-surface">
+      <div className="schedule-toolbar">
+        <label className="schedule-week-picker">{L.weekStarting}<input type="date" value={week} onChange={(event) => chooseDate(event.target.value)} /></label>
+        <button type="button" className="btn2" onClick={() => chooseDate(today)}>{R.today}</button>
+        <div className="schedule-view-switch" role="group" aria-label={R.schedule}>
+          {['day', 'week'].map((mode) => <button type="button" key={mode} aria-pressed={view === mode} onClick={() => { setPreferredView(mode); setEditCell(null) }}>{R[mode]}</button>)}
+        </div>
+        {user.is_manager && <button type="button" className="btn schedule-publish" disabled={busy || loading} onClick={() => mutate(() => publishSchedule(week), (result) => R.weekPublished.replace('{count}', result.published))}>{L.publish}</button>}
+      </div>
+      {user.is_manager && <div className="schedule-management">
+        <form className="schedule-add-form" aria-label={L.addTitle} onSubmit={(event) => {
+          event.preventDefault()
+          mutate(() => createSchedule({ employee_id: Number(newEmp), shift_template_id: Number(newShift), date: newDate }), R.draftAdded)
+        }}>
+          <label>{L.employee}<select required value={newEmp} onChange={(event) => setNewEmp(event.target.value)}>{staff.map((employee) => <option key={employee.id} value={employee.id}>{employee.name}</option>)}</select></label>
+          <label>{R.shift}<select required value={newShift} onChange={(event) => setNewShift(event.target.value)}>{options}</select></label>
+          <label>{R.date}<input required type="date" value={newDate} onChange={(event) => setNewDate(event.target.value)} /></label>
+          <button className="btn2" disabled={busy || loading || !newEmp || !newShift}>{L.add}</button>
+        </form>
+        <details className="schedule-custom">
+          <summary>{L.customTitle}</summary>
+          <form className="schedule-custom-form" onSubmit={(event) => {
+            event.preventDefault()
+            mutate(async () => {
+              await createShiftTemplate({ name_en: shiftNameEn.trim() || R.customShiftName, name_zh: shiftNameZh, start_time: shiftStart, end_time: shiftEnd === 'closing' ? 'closing' : shiftEndTime })
+              setShiftNameEn(''); setShiftNameZh('')
+            }, R.customShiftAdded)
+          }}>
+            <label>{L.customNameEn}<input value={shiftNameEn} onChange={(event) => setShiftNameEn(event.target.value)} /></label>
+            <label>{L.customNameZh}<input value={shiftNameZh} onChange={(event) => setShiftNameZh(event.target.value)} /></label>
+            <label>{L.startTime}<input required type="time" value={shiftStart} onChange={(event) => setShiftStart(event.target.value)} /></label>
+            <label>{L.endTime}<select value={shiftEnd} onChange={(event) => setShiftEnd(event.target.value)}><option value="closing">{L.toClosing}</option><option value="time">{L.endTime}</option></select></label>
+            {shiftEnd === 'time' && <label>{L.endTime}<input required type="time" value={shiftEndTime} onChange={(event) => setShiftEndTime(event.target.value)} /></label>}
+            <button className="btn2" disabled={busy}>{L.addShift}</button>
+          </form>
+          <div className="schedule-quick"><span className="muted">{L.quick}</span>{['14:00', '15:00', '16:00'].map((start) => <button type="button" className="btn2" key={start} disabled={busy} onClick={() => mutate(() => createShiftTemplate({ name_en: `${start}–Closing`, name_zh: `${start}到关门`, start_time: start, end_time: 'closing' }), R.customShiftAdded)}>{start} · {L.toClosing}</button>)}</div>
+        </details>
+      </div>}
+      <div className="schedule-message" role="status" aria-live="polite">{msg || (loading ? T.loading : '')}</div>
+      {view === 'day' ? <div className="schedule-day-view" aria-busy={loading}>
+        <div className="schedule-date-strip" role="group" aria-label={R.date}>
+          {days.map((date) => <button type="button" key={date} aria-pressed={selectedDate === date} aria-current={date === today ? 'date' : undefined} aria-label={formatDate(date, { weekday: 'long', month: 'long', day: 'numeric' })} onClick={() => chooseDate(date)}><span>{formatDate(date, { weekday: 'short' })}</span><strong>{calendarDate(date).getDate()}</strong></button>)}
+        </div>
+        <h3 className="schedule-date-heading">{formatDate(selectedDate, { weekday: 'long', month: 'long', day: 'numeric' })}</h3>
+        {!loading && staff.map((employee) => <article className="schedule-person" key={employee.id}><h4>{employee.name}</h4>{personCell(employee, selectedDate)}</article>)}
+        {!loading && !staff.length && <p className="schedule-empty muted">{R.noShifts}</p>}
+      </div> : <div className="schedule-week-view" tabIndex={0} role="region" aria-label={R.week} aria-busy={loading}>
+        <table className="schedule-week-table">
+          <thead><tr><th scope="col">{L.employee}</th>{days.map((date) => <th scope="col" key={date} aria-current={date === today ? 'date' : undefined}><span>{formatDate(date, { weekday: 'short' })}</span><strong>{formatDate(date, { month: 'short', day: 'numeric' })}</strong></th>)}</tr></thead>
+          <tbody>{!loading && staff.map((employee) => <tr key={employee.id}><th scope="row">{employee.name}</th>{days.map((date) => <td key={date}>{personCell(employee, date)}</td>)}</tr>)}</tbody>
+        </table>
+        {!loading && !staff.length && <p className="schedule-empty muted">{R.noShifts}</p>}
+      </div>}
+    </section>
+  </div>
 }

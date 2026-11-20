@@ -32,10 +32,10 @@ export default function AccountsPage({ user, lang }) {
         {msg && <p className="muted error">{msg}</p>}
       </div>
       <div className="card">
-        <input className="topbar-search" style={{ maxWidth: 320, margin: '0 0 8px' }} placeholder={L.searchPlaceholder} value={query} onChange={(e) => setQuery(e.target.value)} />
+        <input className="team-search" type="search" aria-label={dict(lang).responsive.searchTeam} placeholder={L.searchPlaceholder} value={query} onChange={(e) => setQuery(e.target.value)} />
         <div className="table-scroll">
-        <table>
-          <thead><tr><th>{L.member}</th><th>{L.staffRoles}</th><th>{L.status}</th><th>{L.appRole}</th><th></th></tr></thead>
+        <table className="responsive-table" role="table">
+          <thead><tr><th>{L.member}</th><th>{L.staffRoles}</th><th>{L.status}</th><th>{L.appRole}</th><th>{dict(lang).responsive.actions}</th></tr></thead>
           <tbody>
             {shown.map((a) => (
               <tr key={a.id} className={a.is_active ? '' : 'row-inactive'}>
@@ -45,13 +45,13 @@ export default function AccountsPage({ user, lang }) {
                     <div><b>{a.name}</b><div className="muted" style={{ fontSize: 13 }}>{a.username}</div></div>
                   </div>
                 </td>
-                <td><span className="pill" style={roleStyle(a.role)}>{roleLabel(a.role)}</span></td>
-                <td>
+                <td data-label={L.staffRoles}><span className="pill" style={roleStyle(a.role)}>{roleLabel(a.role)}</span></td>
+                <td data-label={L.status}>
                   <span style={{ color: a.is_active ? '#16A34A' : '#D97706' }}>●</span>{' '}
                   {a.is_active ? L.active : L.inactive}
                 </td>
-                <td>{a.is_owner ? 'Owner' : a.is_manager ? 'Manager' : 'Staff'}</td>
-                <td style={{ whiteSpace: 'nowrap' }}>
+                <td data-label={L.appRole}>{a.is_owner ? dict(lang).owner : a.is_manager ? dict(lang).manager : dict(lang).staff}</td>
+                <td className="row-actions" style={{ whiteSpace: 'nowrap' }}>
                   {a.is_owner || a.id === user.id ? (
                     <span className="muted" style={{ fontSize: 12 }}>{L.ownerLocked}</span>
                   ) : (

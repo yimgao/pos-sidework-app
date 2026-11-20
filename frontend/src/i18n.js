@@ -13,6 +13,7 @@ export function displayText(text, lang) {
 
 const T = {
   en: {
+    responsive: { overview: 'Overview', schedule: 'Schedule', today: 'Today', score: 'My score', review: 'Review', more: 'More', collapse: 'Collapse sidebar', expand: 'Expand sidebar', skip: 'Skip to content', navigation: 'Main navigation', attention: 'Needs attention', reviewAction: 'Review submissions', teamAction: 'Manage team', day: 'Day', week: 'Week', previousDay: 'Previous day', nextDay: 'Next day', noShifts: 'No shifts on this day', searchTeam: 'Search team', actions: 'Actions', completion: 'Completion', noFlags: 'No flagged employees', shift: 'Shift', date: 'Date', edit: 'Edit', cancelShift: 'Cancel shift', draftAdded: 'Draft added. Publish the week to notify staff.', weekPublished: '{count} shifts published.', customShiftName: 'Custom shift', customShiftAdded: 'Shift template added.' },
     appName: 'StorePulse',
     appSub: 'Restaurant operations, at a glance',
     my: 'My', manager: 'Manager', staff: 'Staff', logout: 'Logout',
@@ -142,6 +143,7 @@ const T = {
     },
   },
   zh: {
+    responsive: { overview: '概览', schedule: '排班', today: '今日任务', score: '我的表现', review: '待审核', more: '更多', collapse: '收起侧栏', expand: '展开侧栏', skip: '跳转到内容', navigation: '主导航', attention: '需要处理', reviewAction: '审核提交', teamAction: '管理团队', day: '日', week: '周', previousDay: '前一天', nextDay: '后一天', noShifts: '当天没有班次', searchTeam: '搜索团队', actions: '操作', completion: '完成率', noFlags: '暂无需关注的员工', shift: '班次', date: '日期', edit: '编辑', cancelShift: '取消班次', draftAdded: '已添加草稿，发布本周后员工才可见。', weekPublished: '已发布 {count} 个班次。', customShiftName: '自定义班次', customShiftAdded: '已添加班次模板。' },
     appName: 'StorePulse',
     appSub: '全店运营，一眼看清',
     my: '我的', manager: '经理', staff: '员工', logout: '退出',

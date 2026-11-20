@@ -1,7 +1,7 @@
 // Checklist Templates: templates grouped by role (tabs across the top),
 // add-task form as a modal. Daily assignment kept, filtered by the same
 // role tab. Deleting a task still only deactivates it (history kept).
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createTemplate, deleteTemplate, listAssignments, listEmployees, listRoles, listTemplates, saveAssignments, scheduledStaff, todayStr, uploadStandardPhoto } from '../api'
 import { dict, displayText } from '../i18n'
 import { roleLabel, roleStyle } from '../roles'
@@ -34,6 +34,18 @@ export default function TasksPage({ lang }) {
   const [optional, setOptional] = useState(false)
   const [roles, setRoles] = useState([])
   const [stdFile, setStdFile] = useState(null)
+  const modalRef = useRef(null)
+  useEffect(() => {
+    if (!showModal) return
+    const previousFocus = document.activeElement
+    const overflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    modalRef.current?.querySelector('input, select, button')?.focus()
+    return () => {
+      document.body.style.overflow = overflow
+      previousFocus?.focus()
+    }
+  }, [showModal])
 
   const loadTasks = () => listTemplates().then(setTasks).catch((e) => setMsg(e.message))
   const loadAssign = async (d, id) => {
@@ -136,8 +148,15 @@ export default function TasksPage({ lang }) {
 
       {showModal && (
         <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowModal(false) }}>
-          <div className="modal">
-            <h3>{L.addTitle}</h3>
+          <div className="modal" ref={modalRef} role="dialog" aria-modal="true" aria-labelledby="task-modal-title" onKeyDown={(event) => {
+            if (event.key === 'Escape') { event.stopPropagation(); setShowModal(false) }
+            if (event.key !== 'Tab') return
+            const controls = [...modalRef.current.querySelectorAll('input, select, button, textarea, [tabindex="0"]')].filter((el) => !el.disabled)
+            const first = controls[0], last = controls[controls.length - 1]
+            if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus() }
+            else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus() }
+          }}>
+            <h3 id="task-modal-title">{L.addTitle}</h3>
             <label className="field">{L.group}</label>
             <select value={group} onChange={(e) => setGroup(e.target.value)}>{GROUPS.map((g) => <option key={g} value={g}>{L.group} {g}</option>)}</select>
             <label className="field">{L.titleEn}</label>

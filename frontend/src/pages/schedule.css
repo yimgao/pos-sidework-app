@@ -1,0 +1,79 @@
+/* Schedule is a roster workspace: compact controls, dates, then people. */
+.schedule-workspace { min-width: 0; }
+.schedule-surface { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+.schedule-workspace label { min-width: 0; font-size: 12px; font-weight: 600; color: var(--secondary); }
+.schedule-workspace input, .schedule-workspace select { min-width: 0; margin: 4px 0 0; min-height: 44px; padding: 9px 10px; font-size: 16px; }
+.schedule-workspace button { min-height: 44px; }
+.schedule-workspace button:disabled { opacity: .5; cursor: not-allowed; }
+.schedule-workspace :is(button, summary, [tabindex]):focus-visible { outline: 3px solid var(--indigo); outline-offset: -3px; }
+.schedule-workspace .btn, .schedule-workspace .btn2 { margin: 0; }
+.schedule-toolbar { display: flex; align-items: end; flex-wrap: wrap; gap: 12px; padding: 18px 20px; }
+.schedule-week-picker { width: 175px; }
+.schedule-view-switch { display: flex; padding: 3px; background: var(--fill); border-radius: 10px; }
+.schedule-view-switch button { border: 0; background: transparent; color: var(--secondary); padding: 8px 16px; border-radius: 7px; font-weight: 600; }
+.schedule-view-switch button[aria-pressed=true] { background: var(--card); color: var(--indigo); box-shadow: 0 1px 3px #00000012; }
+.schedule-workspace .schedule-publish { margin-left: auto; }
+.schedule-management { border-block: 1px solid var(--border); padding: 16px 20px 0; background: var(--mint-soft); }
+.schedule-add-form { display: grid; grid-template-columns: minmax(120px, 1fr) minmax(150px, 1.2fr) minmax(145px, .9fr) auto; align-items: end; gap: 12px; }
+.schedule-custom { margin-top: 12px; border-top: 1px solid var(--border); }
+.schedule-custom summary { cursor: pointer; padding: 12px 0; min-height: 44px; color: var(--indigo); font-size: 13px; font-weight: 600; }
+.schedule-custom-form { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; gap: 12px; }
+.schedule-quick { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 12px 0 16px; }
+.schedule-quick > span { flex-basis: 100%; }
+.schedule-message:not(:empty) { padding: 12px 20px; font-size: 14px; border-bottom: 1px solid var(--border); }
+.schedule-week-view { overflow-x: auto; overscroll-behavior-x: contain; }
+.schedule-week-table { min-width: 880px; table-layout: fixed; }
+.schedule-week-table th, .schedule-week-table td { padding: 12px 10px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); vertical-align: top; }
+.schedule-week-table th { text-transform: none; letter-spacing: normal; background: var(--mint-soft); }
+.schedule-week-table th:first-child { position: sticky; left: 0; z-index: 1; width: 130px; }
+.schedule-week-table th[scope=row] { background: var(--card); color: var(--text); font-size: 14px; overflow-wrap: anywhere; }
+.schedule-week-table thead th span, .schedule-week-table thead th strong { display: block; }
+.schedule-week-table thead th strong { color: var(--text); font-size: 15px; margin-top: 4px; }
+.schedule-week-table th[aria-current=date] { box-shadow: inset 0 3px var(--indigo); }
+.schedule-week-table tr:last-child > * { border-bottom: 0; }
+.schedule-week-table tr > :last-child { border-right: 0; }
+.schedule-cell-content { display: flex; gap: 6px; align-items: start; flex-direction: column; min-height: 74px; }
+.schedule-chips { display: flex; gap: 4px; flex-wrap: wrap; min-width: 0; }
+.schedule-chips .shift-chip { max-width: 100%; overflow-wrap: anywhere; }
+.schedule-chips .muted { font-size: 12px; }
+.schedule-edit { border: 0; border-radius: 8px; background: transparent; color: var(--indigo); font-weight: 600; padding: 6px 10px; min-width: 44px; }
+.schedule-edit:hover { background: var(--mint); }
+.schedule-editor { min-width: 0; }
+.schedule-editor-row { display: flex; gap: 4px; align-items: center; margin-bottom: 6px; }
+.schedule-editor-row select { flex: 1; width: 0; margin: 0; }
+.schedule-workspace .schedule-editor-row .btn2 { padding-inline: 8px; min-width: 44px; }
+.schedule-workspace .schedule-cancel { color: var(--red); font-size: 20px; }
+.schedule-date-strip { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; padding: 12px; border-bottom: 1px solid var(--border); }
+.schedule-date-strip button { display: flex; align-items: center; flex-direction: column; gap: 3px; border: 1px solid transparent; border-radius: 10px; background: transparent; color: var(--secondary); padding: 8px 0; }
+.schedule-date-strip button span { font-size: 12px; }
+.schedule-date-strip button strong { font-size: 18px; color: var(--text); }
+.schedule-date-strip button[aria-current=date] { border-color: var(--indigo); }
+.schedule-date-strip button[aria-pressed=true] { background: var(--indigo); color: white; }
+.schedule-date-strip button[aria-pressed=true] strong { color: white; }
+.schedule-date-heading { font-size: 15px; margin: 0; padding: 16px 20px 8px; }
+.schedule-person { padding: 14px 20px; border-bottom: 1px solid var(--border); }
+.schedule-person:last-child { border-bottom: 0; }
+.schedule-person h4 { margin: 0 0 6px; font-size: 15px; }
+.schedule-person .schedule-cell-content { flex-direction: row; align-items: center; justify-content: space-between; min-height: 44px; }
+.schedule-person .schedule-edit { flex-shrink: 0; }
+.schedule-empty { padding: 20px; }
+@media (min-width: 1280px) {
+  .schedule-week-table { min-width: 0; }
+  .schedule-week-table th:first-child { width: 120px; }
+}
+@media (max-width: 1100px) {
+  .schedule-add-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 767px) {
+  .schedule-toolbar { padding: 12px; gap: 8px; }
+  .schedule-week-picker { flex: 1; min-width: 145px; }
+  .schedule-view-switch { display: none; }
+  .schedule-workspace .schedule-publish { flex-basis: 100%; margin-left: 0; }
+  .schedule-management { padding: 12px 12px 0; }
+  .schedule-add-form, .schedule-custom-form { gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .schedule-workspace input, .schedule-workspace select { font-size: 16px; }
+  .schedule-date-strip { padding: 10px 6px; gap: 2px; }
+  .schedule-date-heading { padding-inline: 14px; }
+  .schedule-person { padding-inline: 14px; }
+  .schedule-message:not(:empty) { padding-inline: 14px; }
+}

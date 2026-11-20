@@ -7,7 +7,7 @@ import { dict } from '../i18n'
 import { initials, roleAvatarColor } from '../roles'
 
 function Bar({ value, color }) {
-  return <div className="progress" style={{ margin: '6px 0' }}><i style={{ width: Math.max(0, Math.min(100, value || 0)) + '%', background: color || '#4F46E5' }} /></div>
+  return <div className="progress" style={{ margin: '6px 0' }}><i style={{ width: Math.max(0, Math.min(100, value || 0)) + '%', background: color || 'var(--blue)' }} /></div>
 }
 
 export default function ScorePage({ user, lang }) {
@@ -31,7 +31,7 @@ export default function ScorePage({ user, lang }) {
             <div className="muted">{L.todayScore}</div>
             <div style={{ marginTop: 16 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>{L.completion}</span><b>{data.completion}%</b></div>
-              <Bar value={data.completion} color="#4F46E5" />
+              <Bar value={data.completion} />
               <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>{L.approval}</span><b>{data.quality}%</b></div>
               <Bar value={data.quality} color="#16A34A" />
               <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>{L.ontime}</span><b>{data.ontime}%</b></div>
@@ -52,20 +52,20 @@ export default function ScorePage({ user, lang }) {
       <div className="page-head"><h2>{L.analyticsTitle}</h2><p className="muted">{L.allTitle}</p></div>
       <div className="card">
         <div className="table-scroll">
-        <table><thead><tr><th>{L.employee}</th><th>{L.todayScore}</th><th>{L.rollingTitle}</th><th>{L.completed}</th><th>{L.passed}</th><th>{L.late}</th></tr></thead>
+        <table className="responsive-table" role="table"><thead><tr><th>{L.employee}</th><th>{L.todayScore}</th><th>{L.rollingTitle}</th><th>{L.completed}</th><th>{L.passed}</th><th>{L.late}</th></tr></thead>
           <tbody>{data.map((s) => (
             <tr key={s.employee_id}>
-              <td>
+              <td data-label={L.employee}>
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                   <div className="avatar" style={{ background: roleAvatarColor('server'), color: '#fff' }}>{initials(s.name)}</div>
                   <b>{s.name}</b>
                 </div>
               </td>
-              <td>
+              <td data-label={L.todayScore}>
                 {s.not_assigned ? (lang === 'zh' ? '未分配' : 'Not assigned') : (<><b>{s.score}</b><Bar value={s.score} color={s.score < 70 ? '#DC2626' : '#16A34A'} /></>)}
               </td>
-              <td>{rollById[s.employee_id]?.no_record ? L.noRecord : (rollById[s.employee_id]?.rolling_score ?? '—')}</td>
-              <td>{s.done}/{s.total}</td><td>{s.passed}/{s.reviewed}</td><td>{s.late}</td>
+              <td data-label={L.rollingTitle}>{rollById[s.employee_id]?.no_record ? L.noRecord : (rollById[s.employee_id]?.rolling_score ?? '—')}</td>
+              <td data-label={L.completed}>{s.done}/{s.total}</td><td data-label={L.passed}>{s.passed}/{s.reviewed}</td><td data-label={L.late}>{s.late}</td>
             </tr>
           ))}</tbody>
         </table>
