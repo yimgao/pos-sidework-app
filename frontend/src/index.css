@@ -144,30 +144,19 @@ tr.row-inactive td:first-child{border-left:3px solid var(--amber)}
 .notif-item b{font-size:14px;display:block}
 .notif-item p{margin:2px 0 0;color:var(--secondary);font-size:13px}
 .notif-time{color:var(--secondary);font-size:12px;white-space:nowrap}
-/* Split-screen login (desktop ≥900px): dark Yardkoo panel + form */
-.login-split{min-height:100vh;display:flex;flex-direction:column}
-.login-brand{background:linear-gradient(160deg,#1D3434 0%,#2F4F4F 60%,#355858 100%);color:#fff;padding:36px 28px;display:flex;flex-direction:column;gap:14px}
-.login-brand .badge{align-self:flex-start;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);color:#DFF0EB;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.04em}
-.login-brand h1{font-size:32px;line-height:1.15;margin:0;letter-spacing:-.01em}
-.login-brand p{margin:0;color:#C4D9D3;font-size:15px}
-.login-brand ul{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
-.login-brand li{display:flex;gap:10px;align-items:flex-start;font-size:15px;color:#EDF3F1}
-.login-brand li .tick{color:#4ADE80;font-weight:700;flex-shrink:0}
-.login-brand img{width:220px;max-width:70%;height:auto}
-.login-form-col{flex:1;display:flex;align-items:center;justify-content:center;padding:32px 20px;background:var(--bg)}
-.login-form{width:100%;max-width:400px}
+/* 登录页：居中一张白卡，顶部只放 Yardkoo logo（2026-11-19 用户：品牌大面板没必要，取消）。
+   旧的 .login-split/.login-brand 分屏样式已删除。 */
+.login-simple{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px;background:var(--bg)}
+.login-card{width:100%;max-width:420px;background:#fff;border:1px solid var(--border);border-radius:20px;padding:32px 28px;box-shadow:0 12px 32px rgba(47,79,79,.10)}
+.login-logo{display:flex;justify-content:center;margin-bottom:20px}
+.login-logo img{width:210px;max-width:80%;height:auto;display:block}
+.login-form{width:100%}
 .login-form h2{font-size:24px;margin:0 0 4px}
 .login-form .field-label{display:block;font-size:14px;font-weight:600;margin:14px 0 2px}
 .login-divider{display:flex;align-items:center;gap:12px;color:var(--secondary);font-size:12px;font-weight:700;letter-spacing:.06em;margin:20px 0 10px}
 .login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:var(--border)}
 .demo-row{display:flex;gap:8px;flex-wrap:wrap}
 .demo-row .btn2{flex:1;min-width:100px}
-@media (min-width:900px){
-  .login-split{flex-direction:row}
-  .login-brand{flex:1;max-width:560px;justify-content:center;padding:48px}
-  .login-brand h1{font-size:40px}
-  .login-form-col{flex:1}
-}
 /* 电脑端：左侧竖导航 + 顶栏 */
 .sidebar{display:none}
 .topbar{display:none}

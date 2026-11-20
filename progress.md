@@ -52,7 +52,9 @@
   OAuth / payments / SMS configs exist; only the core is actually built
   (see Blocked).
 
-## Owner 账号不能停用 + 启动自愈 (2026-11-18 晚，用户亲口：owner 账号被停用了，这个操作不可以有)
+## 登录页去掉品牌大面板，只留 logo (2026-11-19，用户亲口：那块没必要，取消掉，但可以有一个 logo)
+- 登录页改回居中一张白卡：顶部只放 Yardkoo logo，下面是 Welcome back + 账号密码 / PIN 登录 + 快速演示登录（都保留）。分屏 `.login-split` / `.login-brand` 样式已删。
+- 验证：build 通过；Playwright 截图验过电脑 1440 与手机 390，零横向溢出（`login-desktop.png`、`login-phone.png`）。
 - **经过：** 用户在 Team & Roles 里把 owner 账号停用了，owner 登不上。之前只禁了删 owner，没禁停用 owner——这是个缺口。
 - **修复：** `PATCH /api/accounts` 停用 owner 直接 403（"Owner 账号不能停用"）；停用自己的账号也 403（防止把自己锁在外面）。Team & Roles 里 owner 行和自己的行不再显示停用按钮，改显示 "Owner 账号不能停用"。员工停用/启用不变。
 - **恢复已停用的 owner：** `seed()` 启动时新增 `ensure_active_owner()`——若没有任何 active owner，就把所有 owner 账号重新激活（只动 owner，不碰员工/经理的停用状态）。用户 Mac 上 `git pull` 后重启容器，owner 自动恢复、直接能登。
