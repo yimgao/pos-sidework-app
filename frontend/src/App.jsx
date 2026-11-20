@@ -120,20 +120,12 @@ export default function App() {
       } catch (e) { setMsg(L.login.wrongPin) }
     }
     return (
-      <div className="login-split">
-        <div className="login-brand">
-          {/* Logo is dark green on transparent: needs a white chip on the dark panel. */}
-          <div style={{ background: '#fff', borderRadius: 14, padding: '10px 14px', alignSelf: 'flex-start' }}>
-            <img src="/yardkoo-logo.svg" alt="Yardkoo Seafood & Grill" style={{ width: 220, maxWidth: '100%', height: 'auto', display: 'block' }} />
+      <div className="login-simple">
+        <div className="login-card">
+          {/* 只有 logo，不放品牌大面板（2026-11-19 用户：那块没必要）。Logo 本身是深绿色，放在白底卡片上。 */}
+          <div className="login-logo">
+            <img src="/yardkoo-logo.svg" alt="Yardkoo Seafood & Grill" />
           </div>
-          <span className="badge">{L.login.badge}</span>
-          <h1>{L.login.headlineA}<br />{L.login.headlineB}</h1>
-          <p>{L.login.subtext}</p>
-          <ul>
-            {L.login.bullets.map((b, i) => <li key={i}><span className="tick">✓</span><span>{b}</span></li>)}
-          </ul>
-        </div>
-        <div className="login-form-col">
           <div className="login-form">
             <h2>{L.login.welcomeBack}</h2>
             <p className="muted">{L.appSub}</p>
